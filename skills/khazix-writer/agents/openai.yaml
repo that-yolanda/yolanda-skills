@@ -1,0 +1,9 @@
+interface:
+  display_name: "卡兹克写作风格SKILL"
+  short_description: "聚焦可读性、删减冗余与降级复杂度"
+  icon_small: "./assets/icon.jpg"
+  icon_large: "./assets/icon.jpg"
+  default_prompt: "Use $khazix-writer 编写一篇卡兹克风格的文章。"
+
+policy:
+  allow_implicit_invocation: false
