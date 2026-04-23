@@ -1,57 +1,71 @@
-# 05-yolanda-skills
-统一维护个人 Agent Skills 的仓库，后续通过 GitHub 分发，并用 `npx skills` 安装到 `Codex`、`Claude Code` 等工具。
+# Yolanda Skills
 
-## 项目脚本
-### 项目初始化
-暂无。
+> Agent skills 仓库。所有 skill 以 `yo-<分类>-<功能>` 命名，由 Hermes / Claude Code / Codex 创建和使用。
 
-### 项目本地运行
-暂无。
+## Architecture
 
-### 项目启动
-暂无。
+### 命名
 
-### 项目调试
-暂无。
+格式：`yo-<分类>-<功能>`
 
-## 项目功能（含规划）
-### 模块 Skill 仓库
-- [x] **统一维护个人 Skills**: 所有个人 Skill 集中存放在根目录 `skills/` 下，作为唯一维护源。
-- [x] **按 Skill 独立目录组织**: 每个 Skill 保持独立目录，可包含 `SKILL.md`、`assets/`、`references/`、`agents/` 等内容。
-- [x] **兼容 `npx skills` 发现规则**: 当前仓库使用 `skills/<skill-name>/` 结构，便于后续直接通过 `npx skills add` 安装。
+| 分类 | 用途 | 示例 |
+|------|------|------|
+| `code` | 编码 | `yo-code-readme`, `yo-code-simplify` |
+| `learn` | 学习与积累 | `yo-learn-wikiclip`, `yo-learn-summarize` |
+| `insight` | 研究与洞察 | `yo-insight-arxiv`, `yo-insight-compare` |
 
-### 模块 已有 Skills
-- [x] **code-review-simplify**: 用于审查代码可读性和复杂度，重点识别过度设计与冗余结构。
-- [x] **readme-skill**: 用于按固定模板创建或更新项目根目录 `README.md`。
-- [x] **khazix-writer**: 用于按既定风格生成公众号长文内容。
+### Skill 目录结构
 
-### 模块 分发与使用规划
-- [ ] **发布到 GitHub**: 后续将该仓库作为公开或私有远程源统一发布与维护。
-- [ ] **通过 `npx skills` 安装**: 后续优先使用 `npx skills` 管理目标目录中的 Skill，而不是自建安装工具。
-- [ ] **面向多 Agent 复用**: 后续安装目标包括 `Codex`、`Claude Code` 等支持 Agent Skills 的工具。
-
-## 项目结构
-```text
-.
-├── README.md                          # 仓库说明与当前维护规划
-├── .gitignore                         # 本地无关文件忽略规则
-└── skills/                            # 个人 Skills 主目录
-    ├── code-review-simplify/          # 代码简化与可读性审查 Skill
-    │   ├── SKILL.md                   # Skill 主说明与触发规则
-    │   ├── agents/openai.yaml         # Agent 侧附加配置
-    │   └── assets/                    # Skill 资源文件
-    ├── khazix-writer/                 # 长文写作 Skill
-    │   ├── SKILL.md                   # Skill 主说明与写作规则
-    │   ├── README.md                  # 该 Skill 自身的补充说明
-    │   ├── LICENSE                    # 该 Skill 附带许可信息
-    │   ├── agents/openai.yaml         # Agent 侧附加配置
-    │   ├── assets/                    # Skill 素材资源
-    │   └── references/                # 写作参考资料
-    └── readme-skill/                  # README 生成与更新 Skill
-        ├── SKILL.md                   # Skill 主说明与输出模板
-        ├── agents/openai.yaml         # Agent 侧附加配置
-        └── assets/                    # Skill 资源文件
+```
+yo-<分类>-<功能>/
+├── SKILL.md              # 主文件（<500 行）
+├── references/           # 可选，参考文档（仅一层深度）
+├── scripts/              # 可选，TypeScript 脚本
+├── agents/               # 可选，Codex 配置
+└── prompts/              # 可选，提示词模板
 ```
 
+### 仓库目录
+
+```
+05-yolanda-skills/
+├── AGENTS.md              # Agent 创建规范（Hermes / Codex 读这个）
+├── CLAUDE.md              # Claude Code 创建规范
+├── README.md              # 仓库说明（给人看）
+├── templates/
+│   └── SKILL_TEMPLATE.md  # 空白模板
+└── skills/
+    ├── yo-code-readme/
+    └── yo-code-simplify/
+```
+
+## 快速开始
+
+### 创建新 Skill
+
+1. 阅读 [AGENTS.md](AGENTS.md) 或 [CLAUDE.md](CLAUDE.md)（取决于当前 agent）
+2. 从 [templates/SKILL_TEMPLATE.md](templates/SKILL_TEMPLATE.md) 复制模板
+3. 按规范填写
+
+### 安装
+
+```bash
+npx skills install github:that-yolanda/yolanda-skills
+```
+
+## Skill 列表
+
+### Code Skills
+- **yo-code-readme**: 创建或更新项目 README.md
+- **yo-code-simplify**: 代码可读性与复杂度审核
+
+### Learn Skills
+*(暂无)*
+
+### Insight Skills
+*(暂无)*
+
 ---
-更新日期:2026-04-10
+
+**最后更新**: 2026-04-20
+**维护者**: Yolanda

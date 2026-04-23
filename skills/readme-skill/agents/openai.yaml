@@ -1,9 +1,0 @@
-interface:
-  display_name: "创建/更新README文件"
-  short_description: "根据代码更新README"
-  icon_small: "./assets/readme.svg"
-  icon_large: "./assets/readme.svg"
-  default_prompt: "Use $readme-skill 检查当前项目README.md文件，若不存在则创建，若存在则检查并更新。"
-
-policy:
-  allow_implicit_invocation: true

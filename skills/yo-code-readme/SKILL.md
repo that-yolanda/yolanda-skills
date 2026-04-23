@@ -1,17 +1,27 @@
 ---
-name: readme-skill
+name: yo-code-readme
 description: 创建或更新项目根目录下的 README.md 文件，并按固定模板整理项目名称、简介、脚本、当前功能、已确认规划、目录结构和更新日期。适用于任意技术架构。Use when the user asks to create, generate, write, refresh, rewrite, or update a project README, including requests such as `创建 readme`、`更新 readme`、`生成 README.md`、`create readme`、`update readme`。
-version: 1.0.0
+version: 0.0.1
 author: yolanda
 ---
 
-# README SKILL
+# CODE README
 
 为项目根目录创建或更新 `README.md`。
 
-README 代表“当前真相 + 已确认规划”。
+README 代表"当前真相 + 已确认规划"。
 
-## 输出结构
+## User Input Tools
+
+When this skill prompts the user, follow this tool-selection rule (priority order):
+
+1. **Prefer built-in user-input tools** exposed by the current agent runtime — e.g., `AskUserQuestion`, `request_user_input`, `clarify`, `ask_user`, or any equivalent.
+2. **Fallback**: if no such tool exists, emit a numbered plain-text message and ask the user to reply with the chosen number/answer for each question.
+3. **Batching**: if the tool supports multiple questions per call, combine all applicable questions into a single call; if only single-question, ask them one at a time in priority order.
+
+Concrete tool names above are examples — substitute the local equivalent in other runtimes.
+
+## Output Template
 
 严格使用以下结构：
 
@@ -43,7 +53,7 @@ README 代表“当前真相 + 已确认规划”。
 更新日期:xxxx-xx-xx
 ```
 
-## 执行流程
+## Execution Flow
 
 1. 快速扫描项目结构、配置、脚本、源码、已有 README、文档和路线图。
 2. 判断自己是否已理解项目定位、模块规划和核心功能。
@@ -51,7 +61,7 @@ README 代表“当前真相 + 已确认规划”。
 4. 整理项目名称、简介、脚本、当前功能、已确认规划和目录结构。
 5. 创建或更新根目录 `README.md`。
 
-## 内容规则
+## Content Rules
 
 - 基于仓库事实和已确认信息写内容，不要臆造。
 - README 必须同时反映：

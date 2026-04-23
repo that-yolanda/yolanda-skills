@@ -1,28 +1,38 @@
 ---
-name: code-review-simplify
-description: 审核代码可读性与复杂度，重点识别 AI 编程常见问题：过度设计、过度抽象、命名晦涩、注释失衡、重复类型、冗余代码、防御代码过多、单次使用却过度封装，以及超出项目需求的复杂度。用于“代码审核”“简化代码”“可读性优化”“重构过度设计”“删减废弃代码”或 code review；如无特殊说明，默认审查当前工作区未提交改动。
-version: 1.0.0
+name: yo-code-simplify
+description: 审核代码可读性与复杂度，重点识别 AI 编程常见问题：过度设计、过度抽象、命名晦涩、注释失衡、重复类型、冗余代码、防御代码过多、单次使用却过度封装，以及超出项目需求的复杂度。用于"代码审核""简化代码""可读性优化""重构过度设计""删减废弃代码"或 code review；如无特殊说明，默认审查当前工作区未提交改动。
+version: 0.0.1
 author: yolanda
 ---
 
-# Code Review Simplify
+# Code Simplify
 
-执行“以减法为先”的代码审查。目标不是补更多结构，而是让代码更短、更直白、更贴近当前项目规模。
+执行"以减法为先"的代码审查。目标不是补更多结构，而是让代码更短、更直白、更贴近当前项目规模。
 
-## 核心原则
+## User Input Tools
+
+When this skill prompts the user, follow this tool-selection rule (priority order):
+
+1. **Prefer built-in user-input tools** exposed by the current agent runtime — e.g., `AskUserQuestion`, `request_user_input`, `clarify`, `ask_user`, or any equivalent.
+2. **Fallback**: if no such tool exists, emit a numbered plain-text message and ask the user to reply with the chosen number/answer for each question.
+3. **Batching**: if the tool supports multiple questions per call, combine all applicable questions into a single call; if only single-question, ask them one at a time in priority order.
+
+Concrete tool names above are examples — substitute the local equivalent in other runtimes.
+
+## Core Principles
 
 - 先判断能不能删，再判断要不要改。
 - 没有真实复用、真实约束、真实变化来源的抽象，默认可疑。
 - 不为假想场景保留当前复杂度。
 - 结论必须落到文件、位置、影响和建议动作。
 
-## 默认范围
+## Default Scope
 
 1. 默认审查当前工作区未提交改动，包含暂存、未暂存和未跟踪文件。
 2. 用户指定文件、目录、提交或 PR 时，以用户指定范围为准。
 3. 如果工作区没有改动，明确告知并请求用户提供范围。
 
-## 重点检查
+## Key Checks
 
 - **可读性与命名**：必须检查文件职责是否过多、函数是否过长、嵌套是否过深、阅读跳转是否过多。文件名、目录名、函数名、参数名必须短、直白、贴近职责；不得使用过长、过虚、过抽象的命名。需要结合上下文猜含义，或名称明显长于职责本身时，必须判定为问题，并直接给出更短、更直白的替代建议。
 - **类型复杂度**：必须检查重复 type/interface、类型链路过长、为少量数据引入过重泛型或条件类型。一个类型技巧如果没有明显提升安全性，必须优先建议简化、内联或就近定义。
@@ -33,7 +43,7 @@ author: yolanda
 - **注释失衡**：简单说明必须优先使用 `//` 单行注释，不得用长段注释解释简单逻辑。单文件的重要逻辑块、关键分支、边界处理，必须补 `//`。对外暴露函数、跨模块接口、复杂流程函数，必须使用 JSDoc。通用 `type/interface` 除了说明用途，关键字段也必须补充单行注释。
 - **保留复杂度的例外**：仅当复杂度直接服务于安全边界、协议契约或核心业务约束，且删除后会明显降低正确性、可维护性或可测试性时，才允许保留。
 
-## 工作流程
+## Execution Flow
 
 1. 确定审查范围。
 2. 先给总体判断：偏简单、基本合理，还是明显过度设计。
@@ -44,7 +54,7 @@ author: yolanda
 6. 没有问题时，明确写“未发现明显可读性/复杂度问题”，并说明剩余风险或未覆盖范围。
 7. 输出报告后等待用户决定改部分还是全部，再动手修改。
 
-## 输出规范与模板
+## Content Rules & Output Template
 
 - 必须先列发现，再给简短总结。
 - 不得只说“可以优化”或“建议重构”，必须明确指出该删什么、并什么、为什么。
