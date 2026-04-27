@@ -1,0 +1,23 @@
+{
+  "name": "yolanda-skills",
+  "owner": {
+    "name": "Yolanda",
+    "email": "wangying123820@gmail.com"
+  },
+  "metadata": {
+    "description": "Skills shared by Yolanda for improving daily work efficiency",
+    "version": "0.0.1"
+  },
+  "plugins": [
+    {
+      "name": "yolanda-skills",
+      "description": "Coding, learning, and utility tools for daily work efficiency",
+      "source": "./",
+      "strict": false,
+      "skills": [
+        "./skills/yo-code-simplify",
+        "./skills/yo-code-readme"
+      ]
+    }
+  ]
+}

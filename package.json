@@ -1,0 +1,20 @@
+{
+  "name": "yolanda-skills",
+  "version": "0.0.1",
+  "description": "Yolanda's private skills for daily use.",
+  "type": "module",
+  "scripts": {
+    "test": "node ./scripts/run-node-tests.mjs",
+    "test:coverage": "node ./scripts/run-node-tests.mjs --experimental-test-coverage"
+  },
+  "keywords": [
+    "skills",
+    "claude code"
+  ],
+  "author": "Yolanda",
+  "license": "MIT",
+  "packageManager": "pnpm@10.32.1",
+  "devDependencies": {
+    "tsx": "^4.21.0"
+  }
+}

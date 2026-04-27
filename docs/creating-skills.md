@@ -1,29 +1,24 @@
 # Creating New Skills
 
+**REQUIRED READING**: [Skill authoring best practices](https://platform.claude.com/docs/en/agents-and-tools/agent-skills/best-practices)
+
 ## Key Requirements
 
 | Requirement | Details |
 |-------------|---------|
-| **Prefix** | 所有 skill 必须使用 `yo-<分类>-` 前缀（`yo-code-`、`yo-learn-`、`yo-insight-`） |
-| **name field** | 最长 64 字符，小写字母/数字/连字符，不含 "anthropic"/"claude" |
-| **description** | 最长 1024 字符，第三人称，包含做什么 + 何时使用 |
-| **SKILL.md body** | 保持在 500 行以内；额外内容放 `references/` |
-| **References** | 仅一层深度，不从 SKILL.md 向外嵌套引用 |
+| **Prefix** | All skills MUST use `yo-<module>-<function>` format |
+| **name field** | Max 64 chars, lowercase letters/numbers/hyphens only, no "anthropic"/"claude" |
+| **description** | Max 1024 chars, third person, include what + when to use |
+| **SKILL.md body** | Keep under 500 lines; use `references/` for additional content |
+| **References** | One level deep from SKILL.md; avoid nested references |
 
-## Skill Grouping
-
-| 分类 | 前缀 | 用途 | 示例 |
-|------|------|------|------|
-| Code Skills | `yo-code-` | 编码相关 | README 生成、代码审查、重构 |
-| Learn Skills | `yo-learn-` | 学习与积累 | 知识采集、闪卡、总结 |
-| Insight Skills | `yo-insight-` | 研究与洞察 | arxiv 分析、趋势研究、对比分析 |
 
 ## SKILL.md Frontmatter Template
 
 ```yaml
 ---
-name: yo-<分类>-<功能>
-description: <第三人称描述。做什么 + 何时使用 + 触发关键词>
+name: yo-<module>-<function>
+description: <Third-person description. What it does + when to use it.>
 version: <semver>
 author: yolanda
 ---
@@ -31,71 +26,128 @@ author: yolanda
 
 ## Steps
 
-1. 创建 `skills/yo-<分类>-<功能>/SKILL.md`，含 YAML frontmatter
-2. 在 `skills/yo-<分类>-<功能>/scripts/` 添加 TypeScript 脚本（如需要）
-3. 在 `skills/yo-<分类>-<功能>/prompts/` 添加提示词模板（如需要）
-4. 在 `skills/yo-<分类>-<功能>/references/` 添加参考文档（如需要）
-5. 在 `skills/yo-<分类>-<功能>/agents/` 添加 agent 配置（如需要）
-6. 如有脚本，在 SKILL.md 中添加 Script Directory section
-7. 更新仓库 README.md 的 Skill 列表
+1. Create `skills/yo-<module>-<function>/SKILL.md` with YAML front matter
+2. Add TypeScript in `skills/yo-<module>-<function>/scripts/` (if applicable)
+3. Add prompt templates in `skills/yo-<module>-<function>/prompts/` if needed
+4. Register the skill in `.claude-plugin/marketplace.json` under the `yolanda-skills` plugin entry
+5. Add Script Directory section to SKILL.md if skill has scripts
+6. Add additional metadata to frontmatter if necessary
+
+## Skill Grouping
+
+All skills are registered under the single `yolanda-skills` plugin. Use these logical groups when deciding where the skill should appear in the docs:
+
+| If your skill... | Use group | Prefix |
+|------------------|-----------|--------|
+| Coding related like README generation, code review, refactoring, etc. | Code Skills | `yo-code-*` |
+| Learning and accumulation | Learn Skills | `yo-learn-*` |
+| Converts or processes content | Utility Skills | `yo-utils-*` |
+
+If you add a new logical group, update the docs that present grouped skills, but keep the skill registered under the single `yolanda-skills` plugin entry.
+
 
 ## Writing Descriptions
 
-**必须使用第三人称：**
+**MUST write in third person**:
 
 ```yaml
 # Good
-description: 创建或更新项目根目录下的 README.md 文件，按固定模板整理项目信息。Use when the user asks to create, update, or refresh a project README.
+description: Generates Xiaohongshu infographic series from content. Use when user asks for "小红书图片", "XHS images".
 
 # Bad
-description: 我可以帮你创建 README 文件
+description: I can help you create Xiaohongshu images
 ```
 
 ## Script Directory Template
 
-有脚本的 SKILL.md 必须包含：
+Every SKILL.md with scripts MUST include:
 
 ```markdown
 ## Script Directory
 
-**Important**: 所有脚本位于本 skill 的 `scripts/` 子目录。
+**Important**: All scripts are located in the `scripts/` subdirectory of this skill.
 
 **Agent Execution Instructions**:
-1. 确定 SKILL.md 文件所在目录路径为 `{baseDir}`
-2. 脚本路径 = `{baseDir}/scripts/<script-name>.ts`
-3. 解析 `${BUN_X}` 运行时：若 `bun` 已安装 → `bun`；若 `npx` 可用 → `npx -y bun`；否则提示安装 bun
-4. 将文档中所有 `{baseDir}` 和 `${BUN_X}` 替换为实际值
+1. Determine this SKILL.md file's directory path as `{baseDir}`
+2. Script path = `{baseDir}/scripts/<script-name>.ts`
+3. Resolve `${BUN_X}` runtime: if `bun` installed → `bun`; if `npx` available → `npx -y bun`; else suggest installing bun
+4. Replace all `{baseDir}` and `${BUN_X}` in this document with actual values
 
 **Script Reference**:
 | Script | Purpose |
 |--------|---------|
-| `scripts/main.ts` | 主入口 |
+| `scripts/main.ts` | Main entry point |
 ```
 
 ## Progressive Disclosure
 
-内容较多的 skill 使用渐进式结构：
+For skills with extensive content:
 
 ```
-skills/yo-<分类>-<功能>/
-├── SKILL.md              # 主指令（<500 行）
+skills/baoyu-example/
+├── SKILL.md                # Main instructions (<500 lines)
+├── EXTEND.md               # Loaded as needed
 ├── references/
-│   ├── styles.md         # 按需加载
-│   └── examples.md       # 按需加载
+│   ├── first-time-setup.md # Loaded as needed
+│   ├── styles.md           # Loaded as needed
+│   └── examples.md         # Loaded as needed
 └── scripts/
     └── main.ts
 ```
 
-从 SKILL.md 引用（仅一层深度）：
+Link from SKILL.md (one level deep only):
+
 ```markdown
-**可用样式**: 参见 [references/styles.md](references/styles.md)
+**Available styles**: See [references/styles.md](references/styles.md)
 ```
 
-## User Input Tools Section（必需）
+## Extension Support (EXTEND.md)
+EXTEND.md is a markdown file using frontmatter to define custom configurations for each skill.
 
-需要向用户提问的 SKILL.md **必须**在顶部（简介之后、主流程之前）包含一个 `## User Input Tools` section。规则必须**内联** — 不得链接到 `docs/user-input-tools.md`（skills 是自包含的）。此文档是作者侧的规范来源，将内容复制到每个 SKILL.md 中。
+Every SKILL.md MUST include EXTEND.md loading. Add as Step 0 (workflow skills) or "Preferences" section (simple skills without workflow):
 
-标准片段（直接复制）：
+```markdown
+## Workflow
+\`\`\`
+- [ ] Step 0: Load preferences (EXTEND.md) ⛔ BLOCKING
+- [ ] Step 1: ...
+\`\`\`
+
+### Step 0: Load preferences (EXTEND.md) ⛔ BLOCKING
+
+Check EXTEND.md existence (priority order):
+
+\`\`\`bash
+test -f .claude/skills/<skill-name>/EXTEND.md -o -f .agent/skills/<skill-name>/EXTEND.md && echo "project"
+test -f "${XDG_CONFIG_HOME:-$HOME/.config}/yolanda-skills/<skill-name>/EXTEND.md" && echo "xdg"
+\`\`\`
+
+| Path | Location |
+|------|----------|
+| `.claude/skills/<skill-name>/EXTEND.md` | Project directory |
+| `.agent/skills/<skill-name>/EXTEND.md` | Project directory |
+| `$XDG_CONFIG_HOME/yolanda-skills/<skill-name>/EXTEND.md` | XDG config (~/.config) |
+
+| Result | Action |
+|--------|--------|
+| Found | Read, parse, display summary |
+| Not found | Ask user via the runtime's user-input tool (see [user-input-tools.md](user-input-tools.md)) |
+```
+
+End of SKILL.md should include:
+
+```markdown
+## Extension Support
+Custom configurations via EXTEND.md. See **Step 0** for paths and supported options.
+```
+
+SKILLS can create `references/first-time-setup.md` to guide users create EXTEND.md with user-input-tools if necessary.
+
+## User Input Tools Section (Required)
+
+Every SKILL.md that prompts the user for choices MUST include exactly one `## User Input Tools` section near the top (right after the intro, before the main workflow). The rule must be **inlined** — do NOT link to `docs/user-input-tools.md` (skills are self-contained; see [CLAUDE.md → Skill Self-Containment](../CLAUDE.md)). The author-side canonical reference lives at [user-input-tools.md](user-input-tools.md); copy its body into each new SKILL.md.
+
+Standard snippet (copy verbatim):
 
 ```markdown
 ## User Input Tools
@@ -106,37 +158,5 @@ When this skill prompts the user, follow this tool-selection rule (priority orde
 2. **Fallback**: if no such tool exists, emit a numbered plain-text message and ask the user to reply with the chosen number/answer for each question.
 3. **Batching**: if the tool supports multiple questions per call, combine all applicable questions into a single call; if only single-question, ask them one at a time in priority order.
 
-Concrete tool names above are examples — substitute the local equivalent in other runtimes.
-```
-
-## Extension Support (EXTEND.md)
-
-支持用户自定义配置的 SKILL.md 必须在开头（Workflow skills 作为 Step 1.1，Utility skills 在 Preferences section）包含 EXTEND.md 加载逻辑：
-
-```markdown
-**1.1 Load Preferences (EXTEND.md)**
-
-检查 EXTEND.md 是否存在（优先级顺序）：
-
-\`\`\`bash
-test -f .yo-skills/<skill-name>/EXTEND.md && echo "project"
-test -f "$HOME/.yo-skills/<skill-name>/EXTEND.md" && echo "user"
-\`\`\`
-
-| 路径 | 位置 |
-|------|------|
-| `.yo-skills/<skill-name>/EXTEND.md` | 项目目录 |
-| `$HOME/.yo-skills/<skill-name>/EXTEND.md` | 用户主目录 |
-
-| 结果 | 操作 |
-|------|------|
-| 找到 | 读取、解析、显示摘要 |
-| 未找到 | 通过 User Input Tools 询问用户 |
-```
-
-SKILL.md 末尾应包含：
-```markdown
-## Extension Support
-
-通过 EXTEND.md 自定义配置。参见 **Step 1.1** 了解路径和支持选项。
+Concrete `AskUserQuestion` references below are examples — substitute the local equivalent in other runtimes.
 ```
