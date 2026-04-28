@@ -11,8 +11,8 @@
 | 分类 | 用途 | 示例 |
 |------|------|------|
 | `code` | 编码 | `yo-code-readme`, `yo-code-simplify` |
-| `learn` | 学习与积累 | `yo-learn-wikiclip`, `yo-learn-summarize` |
-| `insight` | 研究与洞察 | `yo-insight-arxiv`, `yo-insight-compare` |
+| `learn` | 学习与积累 | 预留 |
+| `utils` | 工具 | `yo-utils-url` |
 
 ### Skill 目录结构
 
@@ -32,20 +32,16 @@ yo-<分类>-<功能>/
 ├── AGENTS.md              # Agent 创建规范（Hermes / Codex 读这个）
 ├── CLAUDE.md              # Claude Code 创建规范
 ├── README.md              # 仓库说明（给人看）
+├── docs/
+│   ├── user-input-tools.md  # 用户输入工具(适配多模型的 ask user question 工具)
+│   └── creating-skills.md  # 创建 skill 规范
 ├── templates/
 │   └── SKILL_TEMPLATE.md  # 空白模板
 └── skills/
-    ├── yo-code-readme/
-    └── yo-code-simplify/
+    └── yo-<分类>-<功能>/   # 各个 skill 目录
 ```
 
 ## 快速开始
-
-### 创建新 Skill
-
-1. 阅读 [AGENTS.md](AGENTS.md) 或 [CLAUDE.md](CLAUDE.md)（取决于当前 agent）
-2. 从 [templates/SKILL_TEMPLATE.md](templates/SKILL_TEMPLATE.md) 复制模板
-3. 按规范填写
 
 ### 安装
 
@@ -62,8 +58,8 @@ npx skills install github:that-yolanda/yolanda-skills
 ### Learn Skills
 *(暂无)*
 
-### Insight Skills
-*(暂无)*
+### Utils Skills
+- **yo-utils-url**: 提取 URL 下载文件（微信公众号，twitter，youtube，任意网页 等）
 
 ---
 

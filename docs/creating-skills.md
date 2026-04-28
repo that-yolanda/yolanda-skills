@@ -84,7 +84,7 @@ Every SKILL.md with scripts MUST include:
 For skills with extensive content:
 
 ```
-skills/baoyu-example/
+skills/yo-example-skill/
 ├── SKILL.md                # Main instructions (<500 lines)
 ├── EXTEND.md               # Loaded as needed
 ├── references/
@@ -102,7 +102,7 @@ Link from SKILL.md (one level deep only):
 ```
 
 ## Extension Support (EXTEND.md)
-EXTEND.md is a markdown file using frontmatter to define custom configurations for each skill.
+EXTEND.md is a markdown file using frontmatter to define custom configurations for each skill. Save/Create it in the same directory as SKILL.md.
 
 Every SKILL.md MUST include EXTEND.md loading. Add as Step 0 (workflow skills) or "Preferences" section (simple skills without workflow):
 
@@ -115,7 +115,7 @@ Every SKILL.md MUST include EXTEND.md loading. Add as Step 0 (workflow skills) o
 
 ### Step 0: Load preferences (EXTEND.md) ⛔ BLOCKING
 
-Check EXTEND.md existence (priority order):
+Check EXTEND.md existence (priority order: project level > user level xdg):
 
 \`\`\`bash
 test -f .claude/skills/<skill-name>/EXTEND.md -o -f .agent/skills/<skill-name>/EXTEND.md && echo "project"

@@ -16,7 +16,8 @@
       "strict": false,
       "skills": [
         "./skills/yo-code-simplify",
-        "./skills/yo-code-readme"
+        "./skills/yo-code-readme",
+        "./skills/yo-utils-url"
       ]
     }
   ]
