@@ -56,7 +56,7 @@ npx skills install github:that-yolanda/yolanda-skills
 - **yo-code-simplify**: 代码可读性与复杂度审核
 
 ### Learn Skills
-*(暂无)*
+- **yo-learn-wiki**: 将 Obsidian 笔记/文章按主题组织为结构化知识摘要
 
 ### Utils Skills
 - **yo-utils-url**: 提取 URL 下载文件（微信公众号，twitter，youtube，任意网页 等）
