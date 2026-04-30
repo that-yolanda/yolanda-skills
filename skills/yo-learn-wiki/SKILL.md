@@ -60,8 +60,8 @@ test -f "${XDG_CONFIG_HOME:-$HOME/.config}/yolanda-skills/yo-learn-wiki/EXTEND.m
 
 ### Ingest Step 1: 读取源文件
 
-- 单文件：用 `obsidian read` 读取源文件内容
-- 目录：先用 `obsidian files` 列出文件，用户确认后逐个进入单文件流程
+- 单文件：用 `obsidian-cli read` 读取源文件内容
+- 目录：先用 `obsidian-cli files` 列出文件，用户确认后逐个进入单文件流程
 
 ### Ingest Step 2: 分析内容（LLM）
 
@@ -77,8 +77,8 @@ test -f "${XDG_CONFIG_HOME:-$HOME/.config}/yolanda-skills/yo-learn-wiki/EXTEND.m
 
 对 Step 2 确定的每个页面类型分别匹配：
 
-1. **精确匹配**：用 `obsidian backlinks` 检查源文件是否已被某页面的更新日志引用
-2. **主题匹配**：若未命中，用 `obsidian base:query` 获取所有 Entity/Topic description，比较主题重叠度
+1. **精确匹配**：用 `obsidian-cli backlinks` 检查源文件是否已被某页面的更新日志引用
+2. **主题匹配**：若未命中，用 `obsidian-cli base:query` 获取所有 Entity/Topic description，比较主题重叠度
 3. **无匹配**：创建新页面
 
 ### Ingest Step 4: 写入
@@ -87,14 +87,14 @@ test -f "${XDG_CONFIG_HOME:-$HOME/.config}/yolanda-skills/yo-learn-wiki/EXTEND.m
 
 1. 推断领域子目录（基于内容），不确定则询问用户
 2. 按 [references/template.md](references/template.md) 生成内容（根据 Step 2 判断的类型选择 Entity 或 Topic 模板）
-3. 用 `obsidian create` 创建文件
+3. 用 `obsidian-cli create` 创建文件
 
 **更新已有页面**：
 
-1. 用 `obsidian read` 读取现有页面全文
+1. 用 `obsidian-cli read` 读取现有页面全文
 2. 解析 `## 关联` 中的页面名称
-3. 用 `obsidian base:query` 获取所有 Entity/Topic description → 快速感知关联页面
-4. 若关联页面与本次更新高度相关 → 按需 `obsidian read` 精读
+3. 用 `obsidian-cli base:query` 获取所有 Entity/Topic description → 快速感知关联页面
+4. 若关联页面与本次更新高度相关 → 按需 `obsidian-cli read` 精读
 5. LLM 综合理解后，决定如何补充/刷新：
    - 更新 `## 核心理解`（如果新内容改变了主题认知）
    - 更新 `## 核心特征` 或 `## 支撑框架`（补充要点、修正理解）
@@ -113,19 +113,19 @@ test -f "${XDG_CONFIG_HOME:-$HOME/.config}/yolanda-skills/yo-learn-wiki/EXTEND.m
 
 ### Lint Step 1: 页面元数据
 
-用 `obsidian base:query` 获取所有 Entity 和 Topic，检查 `description`（error）和 `cover`（warn）。
+用 `obsidian-cli base:query` 获取所有 Entity 和 Topic，检查 `description`（error）和 `cover`（warn）。
 
 ### Lint Step 2: 断链检查
 
-用 `obsidian unresolved` 获取未解析链接，过滤仅报告 `{wiki_dir}` 内页面的断链。
+用 `obsidian-cli unresolved` 获取未解析链接，过滤仅报告 `{wiki_dir}` 内页面的断链。
 
 ### Lint Step 3: 无来源页面
 
-用 `obsidian deadends` 获取无出链文件，过滤仅报告 `{wiki_dir}` 内的页面。
+用 `obsidian-cli deadends` 获取无出链文件，过滤仅报告 `{wiki_dir}` 内的页面。
 
 ### Lint Step 4: 孤立源文件
 
-用 `obsidian orphans` 获取无人引用的文件，过滤仅报告 `{source_dirs}` 内的文件。
+用 `obsidian-cli orphans` 获取无人引用的文件，过滤仅报告 `{source_dirs}` 内的文件。
 
 ### Lint 输出格式
 
@@ -148,7 +148,7 @@ test -f "${XDG_CONFIG_HOME:-$HOME/.config}/yolanda-skills/yo-learn-wiki/EXTEND.m
 
 ## CLI 速查
 
-所有命令使用 `obsidian vault="{vault}"` 前缀。`{vault}` 从 EXTEND.md 读取。
+所有命令使用 `obsidian-cli vault="{vault}"` 前缀。`{vault}` 从 EXTEND.md 读取。
 
 ### 读取与查询
 

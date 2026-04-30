@@ -8,10 +8,10 @@
 
 ```bash
 # 1. 当前工作目录是否在某个 vault 内
-obsidian vault info=name 2>/dev/null
+obsidian-cli vault info=name 2>/dev/null
 
 # 2. vault 一级目录列表
-obsidian folders 2>/dev/null || ls -1 "$(git rev-parse --show-toplevel 2>/dev/null || echo .)"
+obsidian-cli folders 2>/dev/null || ls -1 "$(git rev-parse --show-toplevel 2>/dev/null || echo .)"
 ```
 
 根据探测结果，识别名称含以下关键词的目录：
