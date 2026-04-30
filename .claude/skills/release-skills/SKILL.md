@@ -1,6 +1,6 @@
 ---
 name: release-skills
-description: Yolanda Skills 项目的发布工作流。分析变更、生成双语 changelog、更新版本、创建 git tag。当用户说"release"、"发布"、"新版本"、"bump version"、"更新版本"时触发。
+description: Yolanda Skills 项目的发布工作流。分析变更、生成双语 changelog、更新版本、创建 git tag 和 GitHub Release。当用户说"release"、"发布"、"新版本"、"bump version"、"更新版本"时触发。
 ---
 
 # Release Skills
@@ -154,7 +154,7 @@ Check `README.md` and `README.zh.md` (if exists):
 
 ### Step 8: User Confirmation
 
-Before creating release commit, ask user to confirm with two questions:
+Before creating release commit, ask user to confirm with three questions:
 
 1. **Version bump** (single select):
    - Show recommended version
@@ -162,6 +162,9 @@ Before creating release commit, ask user to confirm with two questions:
 
 2. **Push to remote** (single select):
    - Options: "Yes, push after commit", "No, keep local only"
+
+3. **Create GitHub Release** (single select):
+   - Options: "Yes, create GitHub Release with changelog", "No, tag only"
 
 **Preview output**:
 ```
@@ -218,6 +221,33 @@ Files changed:
 
 Tag: v0.1.0
 Status: Pushed to origin  # or "Local only - run git push when ready"
+```
+
+### Step 10: Create GitHub Release
+
+If user confirmed in Step 8:
+
+1. Extract the changelog section for this version from `CHANGELOG.md`
+2. Write it to a temporary file
+3. Create the GitHub Release:
+
+```bash
+# Extract version section from CHANGELOG.md to temp file
+# (from "## {VERSION}" to the next "## " or EOF)
+gh release create v{VERSION} --title "v{VERSION}" --notes-file {temp_file}
+```
+
+4. Clean up temp file
+
+**Note**: If the user chose not to push in Step 8 but wants a GitHub Release, warn that the tag must be pushed first before creating the release. Offer to push the tag only.
+
+**Final output**:
+```
+Release v0.1.0 created.
+
+Tag: v0.1.0
+Push: ✓ origin
+GitHub Release: ✓ https://github.com/.../releases/tag/v0.1.0
 ```
 
 ## Example Usage
