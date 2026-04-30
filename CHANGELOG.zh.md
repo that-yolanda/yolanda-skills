@@ -2,6 +2,20 @@
 
 本项目的所有重要变更都将记录在此文件中。
 
+## 0.1.1 - 2026-04-30
+
+### 新功能
+- release-skills 工作流新增 GitHub Release 步骤
+
+### 修复
+- 升级 actions/checkout 至 v6 以原生支持 Node 24
+- CI 显式启用 Node 24 消除弃用警告
+- CI 从 npm 切换至 bun
+
+### 重构
+- yo-learn-wiki 封面选图改为从 cover_dir 动态扫描，移除硬编码映射表
+- 新增 11 张封面图，压缩已有资源文件（yo-learn-wiki）
+
 ## 0.1.0 - 2026-04-30
 
 ### 新功能
