@@ -6,23 +6,13 @@ Entity 和 Topic 的内容生成规范。本文件是提取维度，输出格式
 
 根据主题领域自动选择封面图，无需询问用户，后续允许用户自己修改。
 
-| 图片 | 适合领域 |
-|------|----------|
-| `bot.jpg` | 人工智能，机器学习 |
-| `scissors.jpg` | 软件工程，效率工具，方法论 |
-| `book.jpg` | 读书笔记，人文社科，通用知识 |
-| `dialog.jpg` | 沟通技巧，团队管理，人物访谈 |
-| `box.jpg` | 项目启动，出发点 |
-| `brain.jpg` | 思维方式，学习方法 |
-| `people.jpg` | 个人成长，职业发展 |
-| `watch.jpg` | 时间管理，习惯养成，效率提升 |
-| `tools.jpg` | 工具使用，效率提升 |
-| `web.jpg` | 网络，web 开发，SEO |
-| `media.jpg` | 自媒体，社交媒体 |
-| `cube.jpg` | 产品开发 |
-| `terminal.jpg` | 终端，命令行，代码 |
+### 获取可用图片
 
-未匹配到时使用 `brain.jpg`。
+```bash
+ls "{cover_dir}"/*.jpg 2>/dev/null | xargs -n1 basename
+```
+
+`{cover_dir}` 从 EXTEND.md 读取。根据返回的文件名列表，选择与页面主题最匹配的图片（按文件名语义判断，如 `bot.jpg` → 人工智能，`terminal.jpg` → 代码，`book.jpg` → 阅读）。若无法匹配，选最通用的图片。
 
 ## Entity
 
