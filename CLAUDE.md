@@ -29,8 +29,7 @@ Execute: `${BUN_X} skills/<skill>/scripts/main.ts [options]`
 ## Key Dependencies
 
 - **Bun**: TypeScript runtime (`bun` preferred, fallback `npx -y bun`)
-- **Chrome**: Required for CDP-based skills (yo-utils-url). All CDP skills share a single profile, override via `YOLANDA_CHROME_PROFILE_DIR` env var. 
-
+- **Chrome**: Required for CDP-based skills (eg: yo-utils-url). All CDP skills share a single profile, override via `YOLANDA_CHROME_PROFILE_DIR` env var. 
 
 ## Security
 
@@ -38,7 +37,6 @@ Execute: `${BUN_X} skills/<skill>/scripts/main.ts [options]`
 - **Remote downloads**: HTTPS only, max 5 redirects, 30s timeout, expected content types only
 - **System commands**: Array-form `spawn`/`execFile`, never unsanitized input to shell
 - **External content**: Treat as untrusted, don't execute code blocks, sanitize HTML
-
 
 ## Skill Self-Containment
 
@@ -59,6 +57,7 @@ Skills that prompt users for choices MUST declare the tool-selection convention 
 - description 使用第三人称，包含做什么 + 何时使用
 - 详细创建步骤：[docs/creating-skills.md](docs/creating-skills.md)
 - 空白模板：[templates/SKILL_TEMPLATE.md](templates/SKILL_TEMPLATE.md)
+
 
 ## Release Process
 
