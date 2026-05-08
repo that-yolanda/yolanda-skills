@@ -1,7 +1,7 @@
 ---
 name: yo-utils-url
 description: 基于 opencli（Chrome CDP + 站点适配器）采集 URL 内容，转为干净的 markdown 并下载图片/视频。Use when user asks to "下载"、"获取"、"提取"、"保存" with a specific URL, or provides a link and wants content archived as local files.
-version: 0.0.1
+version: 0.1.0
 author: yolanda
 ---
 

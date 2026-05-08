@@ -1,7 +1,7 @@
 ---
 name: yo-learn-wiki
 description: 将 Obsidian 笔记按主题组织为知识 Entity，通过 wiki link 建立知识图谱。Use when user asks to "整理笔记", "归档到知识库", "知识库整理", "ingest", "lint", or provides a note and wants it organized into the knowledge base.
-version: 0.1.0
+version: 0.1.1
 author: yolanda
 ---
 

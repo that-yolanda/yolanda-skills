@@ -2,6 +2,23 @@
 
 All notable changes to this project will be documented in this file.
 
+## 0.2.0 - 2026-05-08
+
+### Features
+- Add configurable Chrome profile support via EXTEND.md chrome_profile field (yo-utils-url 0.1.0)
+- Add environment check steps to first-time setup: opencli install, Chrome Bridge verification (yo-utils-url)
+- Add Chrome profile isolation choice (Q5) to setup flow (yo-utils-url)
+
+### Fixes
+- Replace unreliable curl-based CDP port check with opencli daemon status polling (yo-utils-url)
+- Clean stale SingletonLock/Socket/Cookie files before launching Chrome (yo-utils-url)
+- Add Windows and Linux Chrome binary paths to findChrome() (yo-utils-url)
+
+### Documentation
+- Rewrite README with per-skill prerequisites, install steps, and usage examples
+- Replace obsidian-cli with filesystem checks in yo-utils-url first-time setup
+- Add CLI hint for auto-launching Obsidian in yo-learn-wiki (0.1.1)
+
 ## 0.1.1 - 2026-04-30
 
 ### Features
