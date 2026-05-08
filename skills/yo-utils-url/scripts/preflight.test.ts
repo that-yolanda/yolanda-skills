@@ -35,7 +35,7 @@ describe("preflight", () => {
     } else {
       expect(json).toHaveProperty("step");
       expect(json).toHaveProperty("message");
-      expect(["opencli", "launch", "extension"]).toContain(json.step);
+      expect(["opencli", "launch", "extension", "default-profile"]).toContain(json.step);
     }
   }, 20000);
 
@@ -52,7 +52,7 @@ describe("preflight", () => {
       expect(json.status).toBe("error");
       expect(json).toHaveProperty("step");
       expect(json).toHaveProperty("message");
-      expect(["opencli", "launch", "extension"]).toContain(json.step);
+      expect(["opencli", "launch", "extension", "default-profile"]).toContain(json.step);
     }
   }, 20000);
 });

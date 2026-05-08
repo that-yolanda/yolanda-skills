@@ -150,6 +150,8 @@ test -f "${XDG_CONFIG_HOME:-$HOME/.config}/yolanda-skills/yo-learn-wiki/EXTEND.m
 
 所有命令使用 `obsidian-cli vault="{vault}"` 前缀。`{vault}` 从 EXTEND.md 读取。
 
+若 obsidian-cli 依赖 Obsidian 进程，若执行失败，先执行 `open -a Obsidian` 确保进行应用已启动。
+
 ### 读取与查询
 
 | 用途 | 命令 | 输出 |

@@ -59,7 +59,7 @@ test -f "${XDG_CONFIG_HOME:-$HOME/.config}/yolanda-skills/yo-utils-url/EXTEND.md
 
 | Result | Action |
 |--------|--------|
-| Found | 读取 `tmp_dir`、`markdown.dir`、`assets.dir`、`assets.download` 等字段 |
+| Found | 读取 `tmp_dir`、`chrome_profile`、`markdown.dir`、`assets.dir`、`assets.download` 等字段 |
 | Not found | 按 [references/first-time-setup.md](references/first-time-setup.md) 引导创建 |
 
 ### Step 1: Route URL → adapter
@@ -89,6 +89,7 @@ ${BUN_X} {baseDir}/scripts/preflight.ts --need-browser true --config "<extend-pa
 | `{"status":"error","step":"opencli",...}` | 提示安装 opencli |
 | `{"status":"error","step":"launch",...}` | Chrome 启动失败，报告用户 |
 | `{"status":"error","step":"extension",...}` | 提示安装 Browser Bridge 扩展 |
+| `{"status":"error","step":"default-profile",...}` | 提示启动 Chrome 并安装 Bridge，或重新运行 setup 选择隔离 profile |
 
 若 `needs_browser=false`，跳过此步骤。
 

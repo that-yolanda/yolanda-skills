@@ -7,11 +7,11 @@
 先收集信息，减少用户输入：
 
 ```bash
-# 1. 当前工作目录是否在某个 vault 内
-obsidian-cli vault info=name 2>/dev/null
+# 1. 检测是否在 Obsidian vault 内（通过 .obsidian 目录判断）
+test -d .obsidian && echo "in_vault" || echo "not_in_vault"
 
-# 2. vault 一级目录列表
-obsidian-cli folders 2>/dev/null || ls -1 "$(git rev-parse --show-toplevel 2>/dev/null || echo .)"
+# 2. 目录列表
+ls -1
 ```
 
 根据探测结果，识别名称含以下关键词的目录：
@@ -72,9 +72,38 @@ obsidian-cli folders 2>/dev/null || ls -1 "$(git rev-parse --show-toplevel 2>/de
 
 用户也可输入自定义路径。
 
+### Q5：Chrome Profile 选择
+
+> 是否为此 skill 创建独立的 Chrome Profile？
+
+- **创建隔离 Profile (Recommended)** — 不干扰日常浏览，profile 路径写入 EXTEND.md。默认路径根据平台：
+  - macOS/Linux：`~/.config/yolanda-skills/chrome-profile`
+  - Windows：`%LOCALAPPDATA%\yolanda-skills\chrome-profile`
+  - 用户可自定义路径。
+- **复用当前 Chrome** — 不创建隔离 profile，需确保 Chrome 已运行且安装了 Browser Bridge 扩展。
+
 ## 模板
 
 根据用户选择生成 EXTEND.md：
+
+**选 A（隔离 Profile）**：
+
+```yaml
+---
+tmp_dir: .tmp
+chrome_profile: "<chrome_profile_path>"
+markdown:
+  dir: "文章/{platform}"
+  link: short
+assets:
+  download:
+    - image
+    - video
+  dir: "附件/{type}/{article_name}"
+---
+```
+
+**选 B（复用默认）**：
 
 ```yaml
 ---
@@ -91,3 +120,46 @@ assets:
 ```
 
 写入 `{baseDir}/EXTEND.md`。
+
+## 环境检查
+
+写入 EXTEND.md 后，按顺序检查环境：
+
+### 1. 检查 opencli
+
+```bash
+which opencli
+```
+
+未安装 → 询问用户是否执行 `npm install -g opencli`。
+
+### 2. 检查 Chrome Bridge
+
+```bash
+opencli doctor
+```
+
+解析输出判断 extension 是否 connected。
+
+### 3. 创建 Profile 并安装 Bridge（仅选 A）
+
+若用户选择了隔离 Profile：
+
+1. 启动 Chrome 创建 profile：
+   ```bash
+   "<chrome_binary_path>" --remote-debugging-port=9222 --remote-allow-origins=* --no-first-run --user-data-dir="<chrome_profile_path>"
+   ```
+
+2. 引导用户在打开的 Chrome 窗口中安装 Browser Bridge 扩展：
+   - 下载：https://github.com/jackwener/opencli/releases
+   - 打开 `chrome://extensions/` → 开启开发者模式
+   - 点击"加载已解压的扩展程序" → 选择扩展目录
+
+3. 安装完成后验证：
+   ```bash
+   opencli doctor
+   ```
+
+### 4. 安装 Bridge（仅选 B）
+
+引导用户在当前运行的 Chrome 中安装 Browser Bridge 扩展（同上步骤 2），然后 `opencli doctor` 验证。
