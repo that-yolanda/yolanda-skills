@@ -17,6 +17,7 @@
 | ---------------------------------------------------- | ----- | ------------------------------------------------------- | ---------------------------------------------------------------------------------------- |
 | [yo-learn-wiki](#yo-learn-wiki)       | Learn | 基于 Obsidian 的人类可读的知识库，自动生成基于  Obsidian base数据库的可视化知识库目录 | [bun](https://bun.com/), obsidian cli, chrome                                            |
 | [yo-utils-url](#yo-utils-url)         | Utils | 提取 URL 内容保存到 Obsidian 中（微信公众号、Twitter/X、YouTube、任意网页）   | node, [bun](https://bun.com/) [@jackwener/opencli](https://github.com/jackwener/OpenCLI) |
+| [yo-utils-music](#yo-utils-music)     | Utils | 音乐伴侣，基于偏好智能选曲，控制网易云音乐播放                               | node, [@jackwener/opencli](https://github.com/jackwener/OpenCLI), 网易云音乐桌面客户端  |
 | [yo-code-readme](#yo-code-readme)     | Code  | 创建或更新项目 README.md                                       | -                                                                                        |
 | [yo-code-simplify](#yo-code-simplify) | Code  | 代码可读性与复杂度审核                                             | -                                                                                        |
 
@@ -112,6 +113,41 @@ npx skills add github:that-yolanda/yolanda-skills --skill yo-learn-wiki
 
 ```markdown
 检查知识库健康状态
+```
+
+### yo-utils-music
+
+音乐伴侣，根据偏好智能选曲，通过网易云音乐桌面客户端播放。学习你的音乐口味，持续优化推荐。
+
+**准备环境**
+- 安装 [opencli](https://github.com/jackwener/OpenCLI)（若已安装可跳过，安装步骤见上方 yo-utils-url 章节）
+- 安装 [网易云音乐桌面客户端](https://music.163.com/#/download)
+- 首次使用需以调试模式启动网易云音乐（后续 skill 会自动引导）：
+```zsh
+/Applications/NeteaseMusic.app/Contents/MacOS/NeteaseMusic --remote-debugging-port=9223
+```
+
+**安装**
+```zsh
+npx skills add github:that-yolanda/yolanda-skills --skill yo-utils-music
+```
+
+**使用**
+
+```markdown
+来点音乐
+```
+
+```markdown
+播放周杰伦的歌
+```
+
+```markdown
+帮我探索一些民谣
+```
+
+```markdown
+暂停 / 下一首
 ```
 
 ### yo-code-readme

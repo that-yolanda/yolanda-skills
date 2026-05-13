@@ -6,7 +6,7 @@
   },
   "metadata": {
     "description": "Skills shared by Yolanda for improving daily work efficiency",
-    "version": "0.2.0"
+    "version": "0.3.0"
   },
   "plugins": [
     {
@@ -18,7 +18,8 @@
         "./skills/yo-code-simplify",
         "./skills/yo-code-readme",
         "./skills/yo-utils-url",
-        "./skills/yo-learn-wiki"
+        "./skills/yo-learn-wiki",
+        "./skills/yo-utils-music"
       ]
     }
   ]

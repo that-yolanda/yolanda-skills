@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file.
 
+## 0.3.0 - 2026-05-13
+
+### Features
+- Add yo-utils-music skill: music companion with preference learning and NetEase Music desktop control
+- Expand knowledge extraction dimension with novelty criteria (yo-learn-wiki)
+
+### Refactor
+- Redesign yo-code-readme template with screenshots and developer guide
+
+### Documentation
+- Update README with yo-utils-music installation and usage instructions
+
 ## 0.2.0 - 2026-05-08
 
 ### Features
