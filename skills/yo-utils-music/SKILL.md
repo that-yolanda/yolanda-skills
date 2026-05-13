@@ -1,7 +1,7 @@
 ---
 name: yo-utils-music
 description: 音乐伴侣，基于用户偏好通过网易云音乐桌面客户端播放音乐。Use when user asks to "播放音乐"、"听歌"、"来点音乐"、"music"，或表达想听音乐的意图。
-version: 0.1.1
+version: 0.1.2
 author: yolanda
 ---
 
