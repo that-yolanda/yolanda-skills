@@ -1,7 +1,7 @@
 ---
 name: yo-code-simplify
 description: 审核代码可读性与复杂度，重点识别 AI 编程常见问题：过度设计、过度抽象、命名晦涩、注释失衡、重复类型、冗余代码、防御代码过多、单次使用却过度封装，以及超出项目需求的复杂度。用于"代码审核""简化代码""可读性优化""重构过度设计""删减废弃代码"或 code review；如无特殊说明，默认审查当前工作区未提交改动。
-version: 0.0.1
+version: 0.0.2
 author: yolanda
 ---
 
@@ -13,7 +13,7 @@ author: yolanda
 
 When this skill prompts the user, follow this tool-selection rule (priority order):
 
-1. **Prefer built-in user-input tools** exposed by the current agent runtime — e.g., `AskUserQuestion`, `request_user_input`, `clarify`, `ask_user`, or any equivalent.
+1. **Prefer built-in user-input tools** exposed by the current agent runtime — e.g., `AskUserQuestion`, `request_user_input`, `clarify`, `ask_user`, `questionnaire`, or any equivalent.
 2. **Fallback**: if no such tool exists, emit a numbered plain-text message and ask the user to reply with the chosen number/answer for each question.
 3. **Batching**: if the tool supports multiple questions per call, combine all applicable questions into a single call; if only single-question, ask them one at a time in priority order.
 

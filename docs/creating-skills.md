@@ -19,10 +19,12 @@
 ---
 name: yo-<module>-<function>
 description: <Third-person description. What it does + when to use it.>
-version: <semver>
+version: 0.1.0
 author: yolanda
 ---
 ```
+
+`version` 追踪单个 skill 的能力演进，初始值 `0.1.0`。发布时由 `/release-skills` 自动 bump，无需手动维护。
 
 ## Steps
 
@@ -154,7 +156,7 @@ Standard snippet (copy verbatim):
 
 When this skill prompts the user, follow this tool-selection rule (priority order):
 
-1. **Prefer built-in user-input tools** exposed by the current agent runtime — e.g., `AskUserQuestion`, `request_user_input`, `clarify`, `ask_user`, or any equivalent.
+1. **Prefer built-in user-input tools** exposed by the current agent runtime — e.g., `AskUserQuestion`, `request_user_input`, `clarify`, `ask_user`, `questionnaire`, or any equivalent.
 2. **Fallback**: if no such tool exists, emit a numbered plain-text message and ask the user to reply with the chosen number/answer for each question.
 3. **Batching**: if the tool supports multiple questions per call, combine all applicable questions into a single call; if only single-question, ask them one at a time in priority order.
 

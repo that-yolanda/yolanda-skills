@@ -4,7 +4,7 @@
 
 ## Tool Selection（优先级顺序）
 
-1. **优先使用 runtime 内置的用户输入工具** — 如 `AskUserQuestion`、`request_user_input`、`clarify`、`ask_user` 或等效工具。
+1. **优先使用 runtime 内置的用户输入工具** — 如 `AskUserQuestion`、`request_user_input`、`clarify`、`ask_user`、`questionnaire` 或等效工具。
 2. **回退到纯文本**：若无此类工具，输出编号的纯文本消息，让用户回复选择的编号/答案。
 3. **批量规则**：
    - 若工具支持**单次调用多个问题**（如 `AskUserQuestion`）：**将所有适用的问题合并为一次调用，不得拆分为多次调用。**

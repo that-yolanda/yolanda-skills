@@ -1,7 +1,7 @@
 ---
 name: yo-utils-music
 description: 音乐伴侣，基于用户偏好通过网易云音乐桌面客户端播放音乐。Use when user asks to "播放音乐"、"听歌"、"来点音乐"、"music"，或表达想听音乐的意图。
-version: 0.1.0
+version: 0.1.1
 author: yolanda
 ---
 
@@ -14,7 +14,7 @@ author: yolanda
 
 When this skill prompts the user, follow this tool-selection rule (priority order):
 
-1. **Prefer built-in user-input tools** exposed by the current agent runtime — e.g., `AskUserQuestion`, `request_user_input`, `clarify`, `ask_user`, or any equivalent.
+1. **Prefer built-in user-input tools** exposed by the current agent runtime — e.g., `AskUserQuestion`, `request_user_input`, `clarify`, `ask_user`, `questionnaire`, or any equivalent.
 2. **Fallback**: if no such tool exists, emit a numbered plain-text message and ask the user to reply with the chosen number/answer for each question.
 3. **Batching**: if the tool supports multiple questions per call, combine all applicable questions into a single call; if only single-question, ask them one at a time in priority order.
 

@@ -1,7 +1,7 @@
 ---
 name: yo-utils-url
 description: 基于 opencli（Chrome CDP + 站点适配器）采集 URL 内容，转为干净的 markdown 并下载图片/视频。Use when user asks to "下载"、"获取"、"提取"、"保存" with a specific URL, or provides a link and wants content archived as local files.
-version: 0.1.0
+version: 0.1.1
 author: yolanda
 ---
 
@@ -15,7 +15,7 @@ author: yolanda
 
 When this skill prompts the user, follow this tool-selection rule (priority order):
 
-1. **Prefer built-in user-input tools** exposed by the current agent runtime — e.g., `AskUserQuestion`, `request_user_input`, `clarify`, `ask_user`, or any equivalent.
+1. **Prefer built-in user-input tools** exposed by the current agent runtime — e.g., `AskUserQuestion`, `request_user_input`, `clarify`, `ask_user`, `questionnaire`, or any equivalent.
 2. **Fallback**: if no such tool exists, emit a numbered plain-text message and ask the user to reply with the chosen number/answer for each question.
 3. **Batching**: if the tool supports multiple questions per call, combine all applicable questions into a single call; if only single-question, ask them one at a time in priority order.
 

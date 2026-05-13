@@ -1,7 +1,7 @@
 ---
 name: yo-learn-wiki
 description: 将 Obsidian 笔记按主题组织为知识 Entity，通过 wiki link 建立知识图谱。Use when user asks to "整理笔记", "归档到知识库", "知识库整理", "ingest", "lint", or provides a note and wants it organized into the knowledge base.
-version: 0.1.1
+version: 0.1.2
 author: yolanda
 ---
 
@@ -18,7 +18,7 @@ author: yolanda
 
 When this skill prompts the user, follow this tool-selection rule (priority order):
 
-1. **Prefer built-in user-input tools** exposed by the current agent runtime — e.g., `AskUserQuestion`, `request_user_input`, `clarify`, `ask_user`, or any equivalent.
+1. **Prefer built-in user-input tools** exposed by the current agent runtime — e.g., `AskUserQuestion`, `request_user_input`, `clarify`, `ask_user`, `questionnaire`, or any equivalent.
 2. **Fallback**: if no such tool exists, emit a numbered plain-text message and ask the user to reply with the chosen number/answer for each question.
 3. **Batching**: if the tool supports multiple questions per call, combine all applicable questions into a single call; if only single-question, ask them one at a time in priority order.
 

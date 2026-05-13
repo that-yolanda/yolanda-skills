@@ -59,13 +59,37 @@ Skills that prompt users for choices MUST declare the tool-selection convention 
 - 空白模板：[templates/SKILL_TEMPLATE.md](templates/SKILL_TEMPLATE.md)
 
 
-## Release Process
+## Version Management
 
-Use `/release-skills` workflow. Never skip:
+两层版本体系：
+
+| 层级 | 位置 | 追踪范围 |
+|------|------|----------|
+| Skill 版本 | SKILL.md frontmatter `version` | 单个 skill 的能力演进 |
+| 项目版本 | package.json + marketplace.json（统一） | 整个插件集合的发布状态 |
+
+### Bump 规则
+
+项目版本取所有变更中的**最高级别**：
+
+| 变更类型 | 项目 bump | Skill bump |
+|----------|-----------|------------|
+| 框架变动（CLAUDE.md、docs/、.claude/skills/） | major | — |
+| 新增 skill | minor | 初始版本 `0.1.0` |
+| 修改现有 skill | patch | patch |
+
+Skill 版本独立演进，有变更时一律 patch。
+
+### Release 流程
+
+使用 `/release-skills`，仅在准备发布时调用。日常 commit/push 与版本 bump 无关。
+
+Never skip:
 1. `CHANGELOG.md` + `CHANGELOG.zh.md`
-2. `marketplace.json` version bump
-3. `README.md` + `README.zh.md` if applicable
-4. All files committed together before tag
+2. `package.json` + `marketplace.json` 版本同步更新
+3. 变更 skill 的 SKILL.md frontmatter version patch bump
+4. `README.md` + `README.zh.md` if applicable
+5. All files committed together before tag
 
 
 ## Code Style

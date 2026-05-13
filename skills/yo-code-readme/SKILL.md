@@ -1,7 +1,7 @@
 ---
 name: yo-code-readme
 description: 创建或更新项目根目录下的 README.md 文件，按固定模板整理项目名称、简介、核心功能、快速开始、开发指南、规划和参考文档。适用于任意技术架构。Use when the user asks to create, generate, write, refresh, rewrite, or update a project README, including requests such as `创建 readme`、`更新 readme`、`生成 README.md`、`create readme`、`update readme`。
-version: 0.1.0
+version: 0.1.1
 author: yolanda
 ---
 
@@ -13,7 +13,7 @@ author: yolanda
 
 When this skill prompts the user, follow this tool-selection rule (priority order):
 
-1. **Prefer built-in user-input tools** exposed by the current agent runtime — e.g., `AskUserQuestion`, `request_user_input`, `clarify`, `ask_user`, or any equivalent.
+1. **Prefer built-in user-input tools** exposed by the current agent runtime — e.g., `AskUserQuestion`, `request_user_input`, `clarify`, `ask_user`, `questionnaire`, or any equivalent.
 2. **Fallback**: if no such tool exists, emit a numbered plain-text message and ask the user to reply with the chosen number/answer for each question.
 3. **Batching**: if the tool supports multiple questions per call, combine all applicable questions into a single call; if only single-question, ask them one at a time in priority order.
 
