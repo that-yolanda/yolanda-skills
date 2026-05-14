@@ -1,18 +1,19 @@
 ---
 name: yo-learn-wiki
-description: 将 Obsidian 笔记按主题组织为知识 Entity，通过 wiki link 建立知识图谱。Use when user asks to "整理笔记", "归档到知识库", "知识库整理", "ingest", "lint", or provides a note and wants it organized into the knowledge base.
-version: 0.1.2
+description: 将 Obsidian 笔记按专题组织为知识 Entity，通过 wiki link 建立知识图谱。Use when user asks to "整理笔记", "归档到知识库", "知识库整理", "知识库诊断", "专题整理", "ingest", "diagnose", "restructure", or provides a note and wants it organized into the knowledge base.
+version: 0.1.3
 author: yolanda
 ---
 
 # Yo Learn Wiki
 
-将 Obsidian 笔记按主题梳理为知识 Entity，通过 wiki link 关联源材料，构建个人知识图谱。
+将 Obsidian 笔记按专题梳理为知识 Entity，通过 wiki link 关联源材料，构建个人知识图谱。
 基于 Obsidian CLI 查询元数据和链接关系，最小化全文读取。
 
-两个操作：
-- **ingest**：读取源文件 → 匹配/创建 Entity → 写入
-- **lint**：检查知识库健康状态（零全文读取）
+三个操作：
+- **ingest**：读取源文件 → 匹配/创建 Entity → 写入专题
+- **diagnose**：知识库健康诊断（零全文读取）
+- **restructure**：专题结构整理
 
 ## User Input Tools
 
@@ -28,7 +29,7 @@ Concrete `AskUserQuestion` references below are examples — substitute the loca
 
 ```
 - [ ] Step 0: Load preferences (EXTEND.md) ⛔ BLOCKING
-- [ ] Step 1: Determine operation (ingest / lint)
+- [ ] Step 1: Determine operation (ingest / diagnose / restructure)
 ```
 
 ### Step 0: Load preferences (EXTEND.md) ⛔ BLOCKING
@@ -52,7 +53,8 @@ test -f "${XDG_CONFIG_HOME:-$HOME/.config}/yolanda-skills/yo-learn-wiki/EXTEND.m
 | 用户意图 | 操作 |
 |---------|------|
 | 提供文件/目录路径，要求整理 | → Ingest |
-| 要求检查、审查知识库状态 | → Lint |
+| 要求检查、诊断知识库状态 | → Diagnose |
+| 要求整理专题结构、重组目录 | → Restructure |
 
 ---
 
@@ -85,7 +87,9 @@ test -f "${XDG_CONFIG_HOME:-$HOME/.config}/yolanda-skills/yo-learn-wiki/EXTEND.m
 
 **创建新页面**：
 
-1. 推断领域子目录（基于内容），不确定则询问用户
+1. **专题匹配**：用 `obsidian-cli folders folder="{wiki_dir}"` 获取现有专题目录，对比本次内容主题
+   - 命中现有专题 → 放入该专题目录
+   - 未命中 → 询问用户：归入现有专题 / 创建新专题 / 稍后手动处理
 2. 按 [references/template.md](references/template.md) 生成内容（根据 Step 2 判断的类型选择 Entity 或 Topic 模板）
 3. 用 `obsidian-cli create` 创建文件
 
@@ -107,30 +111,30 @@ test -f "${XDG_CONFIG_HOME:-$HOME/.config}/yolanda-skills/yo-learn-wiki/EXTEND.m
 
 ---
 
-## Operation: Lint
+## Operation: Diagnose（知识库诊断）
 
 **全程零全文读取**，4 条 CLI 命令覆盖所有检查项。
 
-### Lint Step 1: 页面元数据
+### Diagnose Step 1: 页面元数据
 
 用 `obsidian-cli base:query` 获取所有 Entity 和 Topic，检查 `description`（error）和 `cover`（warn）。
 
-### Lint Step 2: 断链检查
+### Diagnose Step 2: 断链检查
 
 用 `obsidian-cli unresolved` 获取未解析链接，过滤仅报告 `{wiki_dir}` 内页面的断链。
 
-### Lint Step 3: 无来源页面
+### Diagnose Step 3: 无来源页面
 
 用 `obsidian-cli deadends` 获取无出链文件，过滤仅报告 `{wiki_dir}` 内的页面。
 
-### Lint Step 4: 孤立源文件
+### Diagnose Step 4: 孤立源文件
 
 用 `obsidian-cli orphans` 获取无人引用的文件，过滤仅报告 `{source_dirs}` 内的文件。
 
-### Lint 输出格式
+### 诊断输出格式
 
 ```
-## Lint 报告
+## 诊断报告
 
 ### Errors ({n})
 - {domain}/{name}.md: 缺少 description
@@ -143,6 +147,39 @@ test -f "${XDG_CONFIG_HOME:-$HOME/.config}/yolanda-skills/yo-learn-wiki/EXTEND.m
 ### Info: 孤立源文件 ({n})
 - {source_dir}/{file}.md
 ```
+
+---
+
+## Operation: Restructure（专题整理）
+
+检查并调整知识库的专题目录结构。
+
+### Restructure Step 1: 扫描结构
+
+用 `obsidian-cli folders folder="{wiki_dir}"` 获取所有专题目录及其文件数量。
+
+### Restructure Step 2: 两阶段分析
+
+**阶段一（粗筛）**：用 `obsidian-cli base:query file="{base_file}" format=json` 获取所有页面的 description，快速感知每个专题下的内容分布。
+
+**阶段二（精读）**：对粗筛中判断模糊的专题（如 description 相似度高、或主题边界不清），用 `obsidian-cli read` 精读具体文件内容，明确归属。
+
+大部分专题到阶段一即可，仅对存疑部分进入阶段二。
+
+### Restructure Step 3: 生成建议
+
+基于内容语义判断，不依赖文件数量：
+
+| 信号 | 建议 |
+|------|------|
+| 单个专题内 description 主题跨度大、无明显内在联系 | 建议拆分为更细专题 |
+| 小专题内容与另一专题高度重叠 | 建议合并 |
+| 多个专题间的 Entity 存在强关联但分属不同专题 | 建议重组 |
+| 小专题内容独立、无重叠 | 保留，不做建议 |
+
+### Restructure Step 4: 执行
+
+输出建议列表，用户逐条确认后执行移动。
 
 ---
 
@@ -172,7 +209,7 @@ test -f "${XDG_CONFIG_HOME:-$HOME/.config}/yolanda-skills/yo-learn-wiki/EXTEND.m
 | 追加内容到文件末尾 | `append file="{name}" content="..."` |
 | 设置 frontmatter 属性 | `property:set file="{name}" name={prop} value="{val}"` |
 
-### 诊断
+### Diagnose
 
 | 用途 | 命令 | 输出 |
 |------|------|------|

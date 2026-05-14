@@ -84,6 +84,28 @@ npx skills add github:that-yolanda/yolanda-skills --skill yo-utils-url
 
 基于 Obsidian 的人类可读的知识库，自动生成基于  Obsidian base数据库的可视化知识库目录，构建个人知识图谱。
 
+**流程设计**
+
+```
+初始化
+  检测 Vault → 配置 EXTEND.md → 创建 Base 视图 → 复制封面图 → 验证
+  (可选) 预设专题目录
+
+Ingest（整理笔记）
+  源文件 → 分析内容（Entity / Topic）
+         → 匹配已有页面
+              ├─ 已存在 → 增量更新
+              └─ 不存在 → 专题匹配
+                           ├─ 命中现有专题 → 放入
+                           └─ 未命中 → 确认新专题 → 创建页面
+
+Diagnose（知识库诊断）
+  元数据检查 → 断链检查 → Dead end → 孤立源文件
+
+Restructure（专题整理 · 建议定期执行）
+  粗筛 description → 精读存疑内容 → 拆分 / 合并建议 → 确认后执行
+```
+
 **准备环境**
 - 确保已安装 [Obsidian](https://obsidian.md/)
 - 启用obsidian-cli：进入 Obsidian → 设置 → 关于 → 命令行界面
@@ -112,7 +134,11 @@ npx skills add github:that-yolanda/yolanda-skills --skill yo-learn-wiki
 ```
 
 ```markdown
-检查知识库健康状态
+诊断知识库健康状态
+```
+
+```markdown
+整理知识库专题结构
 ```
 
 ### yo-utils-music
