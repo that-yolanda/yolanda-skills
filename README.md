@@ -155,7 +155,7 @@ npx skills add github:that-yolanda/yolanda-skills --skill yo-learn-wiki
 
 **安装**
 ```zsh
-npx skills add github:that-yolanda/yolanda-skills --skill yo-utils-music
+opencli plugin install github:that-yolanda/opencli-netease-music
 ```
 
 **使用**
