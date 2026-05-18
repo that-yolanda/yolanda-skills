@@ -12,12 +12,14 @@ macOS 网易云音乐桌面客户端控制适配器，基于 CDP (Chrome DevTool
 /Applications/NeteaseMusic.app/Contents/MacOS/NeteaseMusic --remote-debugging-port=9223 &>/dev/null &
 ```
 
+CDP 默认监听 `localhost:9223`，通过 `/json` 获取页面目标的 WebSocket 调试地址。
+
 ### 技术要点
 
 - **平台限制**：仅支持 macOS
 - **通信方式**：通过 Node 22 内置 `WebSocket` 连接 CDP，使用 `Runtime.evaluate` 注入 JS 操作 DOM
 - **导航交互**：侧边栏等 React 组件需要 CDP 原生鼠标事件 (`Input.dispatchMouseEvent`)，JS `dispatchEvent` 无法触发点击
-- **页面导航后**：WebSocket 连接会断开，命令内部会自动重连
+- **页面导航后**：WebSocket 连接会断开，需要重新调用 `getCdpSocket()` 获取新地址
 - **依赖**：仅依赖 `@jackwener/opencli` 运行时，无第三方包
 
 ## 命令列表
@@ -56,9 +58,9 @@ opencli netease-music next
 opencli netease-music next --direction prev
 ```
 
-### playlist - 查看播放列表
+### playlist - 播放列表
 
-获取当前播放列表中的歌曲。
+获取当前播放列表中的歌曲，或清空播放列表。
 
 ```bash
 # 默认返回 50 首
@@ -66,6 +68,9 @@ opencli netease-music playlist
 
 # 指定返回数量（最大 100）
 opencli netease-music playlist --limit 20
+
+# 清空播放列表
+opencli netease-music playlist --clear
 ```
 
 输出示例：
@@ -74,6 +79,12 @@ opencli netease-music playlist --limit 20
 |-------|------|--------|----------|
 | 1 | 晴天 | 周杰伦 | 04:59 |
 | 2 | 七里香 | 周杰伦 | 04:59 |
+
+清空时输出：
+
+| Action | Playlist |
+|--------|----------|
+| Cleared | 播放列表已清空 |
 
 ### favorite - 播放我喜欢的音乐
 
@@ -142,13 +153,12 @@ netease-music/
 ├── status.js       # 播放状态读取
 ├── play.js         # 播放/暂停
 ├── next.js         # 上一首/下一首
-├── playlist.js     # 播放列表读取（虚拟列表滚动提取）
+├── playlist.js     # 播放列表读取与清空（虚拟列表滚动提取）
 ├── favorite.js     # 导航到"我喜欢的音乐"并播放
 ├── explore.js      # 精选歌单浏览（分类→歌单→播放）
-└── search.js       # 搜索歌曲（输入→搜索→播放）
+├── search.js       # 搜索歌曲（输入→搜索→播放）
+└── SKILL.md        # 本文件
 ```
-
-CDP 监听 `localhost:9223`，通过 `/json` 获取页面目标的 WebSocket 调试地址。
 
 ### CDP 交互模式
 
@@ -178,12 +188,14 @@ CDP 监听 `localhost:9223`，通过 `/json` 获取页面目标的 WebSocket 调
 | 歌单卡片 | `.playlist-card`，含 `.name` 和 `.play-count` |
 | 分类按钮 | `.tags-btns button`，更多分类面板用 `[class*="TagsContainer"] button` |
 | 播放列表虚拟列表 | `.ReactVirtualized__Grid__innerScrollContainer` |
+| 播放列表清空按钮 | `.clear-icon button` |
+| 清空确认弹窗 | `[class*="ModalWrapper"]`，确认按钮 `button[aria-label="confirm"]` |
 
 ## 连接故障排查
 
 当 `opencli netease-music status` 执行失败时，按以下步骤排查：
 
-### 1. 应用未在调试模式运行
+### 1. 网易云音乐未运行
 
 检查进程：
 
@@ -191,19 +203,43 @@ CDP 监听 `localhost:9223`，通过 `/json` 获取页面目标的 WebSocket 调
 pgrep -f NeteaseMusic || echo "not_running"
 ```
 
-若未运行或运行中但未带 `--remote-debugging-port`，需要重启到调试模式：
+输出 `not_running` → 需要以调试模式启动：
 
 ```bash
-pkill NeteaseMusic 2>/dev/null; sleep 2
 /Applications/NeteaseMusic.app/Contents/MacOS/NeteaseMusic --remote-debugging-port=9223 &>/dev/null &
 ```
 
-启动后用 status 命令验证连接：
+### 2. 运行中但未开启调试端口
+
+若网易云已在运行但未带 `--remote-debugging-port` 参数，CDP 无法连接。需要：
+
+1. 退出当前网易云音乐
+2. 以调试模式重新启动：
+
+```bash
+pkill NeteaseMusic
+sleep 2
+/Applications/NeteaseMusic.app/Contents/MacOS/NeteaseMusic --remote-debugging-port=9223 &>/dev/null &
+```
+
+### 3. 导航后连接断开
+
+页面导航（如 explore、search）会导致 WebSocket 断开。opencli 命令内部会自动重连。若连续操作时出现连接错误，等待 2-3 秒后重试即可。
+
+### 4. 验证连接
+
+启动/重启后，用 status 命令验证：
 
 ```bash
 opencli netease-music status
 ```
 
-### 2. 导航后连接断开
+返回播放状态表格即表示连接正常。
 
-页面导航（如 explore、search）会导致 WebSocket 断开。命令内部会自动重连，若连续操作时出现连接错误，等待 2-3 秒后重试即可。
+## 免责声明
+
+本项目仅供学习和技术研究使用，不得用于任何商业用途。本项目通过非官方方式与网易云音乐客户端交互，可能违反网易云音乐用户协议，使用者需自行承担相关风险。本项目与网易云音乐公司无任何关联。
+
+## 许可证
+
+[MIT License](LICENSE)
