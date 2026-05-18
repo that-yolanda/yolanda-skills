@@ -26,7 +26,7 @@ opencli netease-music status
 启动命令：
 
 ```bash
-/Applications/NeteaseMusic.app/Contents/MacOS/NeteaseMusic --remote-debugging-port=9223
+/Applications/NeteaseMusic.app/Contents/MacOS/NeteaseMusic --remote-debugging-port=9223 &>/dev/null &
 ```
 
 启动后重新执行 `opencli netease-music status` 验证连接。
