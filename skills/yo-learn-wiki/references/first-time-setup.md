@@ -50,7 +50,7 @@ obsidian-cli bases
 
 ### Q5：封面图存放路径（cover_dir）
 
-Entity 的 `cover` 属性引用封面图，图片需要存在于 vault 中。询问用户：
+页面 `cover` 属性引用封面图，图片需要存在于 vault 中。询问用户：
 
 - 选项 A：放在 `wiki_dir` 下（如 `08-知识库/assets/`）
 - 选项 B：用户已有的资源目录（从 `obsidian-cli folders` 结果中选择）
@@ -59,11 +59,18 @@ Entity 的 `cover` 属性引用封面图，图片需要存在于 vault 中。询
 
 询问用户是否需要预设专题目录：
 
-- 选项 A：根据使用场景生成建议结构（用户描述目标 → AI 拟定目录 → 确认后创建）
+- 选项 A：根据使用场景和现有内容生成建议结构（AI 拟定目录 → 用户确认 → 创建）
 - 选项 B：稍后手动创建（ingest 时会根据内容自动建议专题）
 - 选项 C：跳过，使用现有目录结构
 
-若选 A，根据用户描述的使用场景（如"AI Skill 开发"、"内容创作"、"产品管理"）生成 3-7 个专题目录名，确认后创建。专题会在后续 ingest 中自然生长，无需一次定义完整。
+若选 A，AI 执行以下流程：
+
+1. **扫描现有内容**：用 `obsidian-cli files` 扫描 `source_dirs` 下的文件，感知用户已有的知识方向
+2. **结合用户描述**：用户描述使用场景（如"AI Skill 开发"、"内容创作"、"产品管理"）
+3. **用准入标准筛选**：对每个候选专题用 [references/template.md](template.md) 的「准入标准」（专题级）评估——只保留可复用、可积累、服务于 AI 任务的主题。过滤掉具体工具操作、新闻、零散技术笔记
+4. **生成建议**：3-7 个专题，每个包含名称、覆盖范围、服务的 AI 任务场景。用户确认后创建目录和索引页
+
+专题会在后续 ingest 中自然生长，无需一次定义完整。
 
 ## 设置后操作
 
@@ -75,21 +82,19 @@ Entity 的 `cover` 属性引用封面图，图片需要存在于 vault 中。询
 obsidian-cli vault="{vault}" read file="{base_file}"
 ```
 
-若文件不存在，用 `obsidian-cli create` 创建：
+若文件不存在，用 `obsidian-cli create` 创建。Base 视图只展示专题索引页（通过 `00-` 文件名前缀识别），过滤排除 .base 文件自身：
 
 ```bash
 obsidian-cli vault="{vault}" create path="{wiki_dir}/{base_file}" content="views:
   - type: cards
-    name: 目录
+    name: 知识库
     filters:
       and:
-        - or:
-            - file.tags.contains(\"Entity\")
-            - file.tags.contains(\"Topic\")
-        - '!file.path.startsWith(\"98-模板\")'
+        - file.name.startsWith(\"00-\")
+        - file.path.startsWith(\"{wiki_dir}/\")
+        - file.extension == \"md\"
     order:
       - file.name
-      - tags
     image: note.cover"
 ```
 
