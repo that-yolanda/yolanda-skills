@@ -5,6 +5,8 @@ version: 0.1.1
 author: yolanda
 ---
 
+> ⚠️ **Deprecated**：本 skill 已废弃、不再维护。URL 内容采集已由 `opencli`（配合 `agent-browser`）直接完成。
+
 # Yo Utils URL
 
 通过 opencli 采集 URL 内容，输出干净的 markdown + 本地图片/视频。

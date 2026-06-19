@@ -1,60 +1,40 @@
 # Changelog
 
-All notable changes to this project will be documented in this file.
+本文件记录本仓库所有 notable 变更。
 
-## 0.3.0 - 2026-05-13
+## 1.0.0 - 2026-06-19
 
-### Features
-- Add yo-utils-music skill: music companion with preference learning and NetEase Music desktop control
-- Expand knowledge extraction dimension with novelty criteria (yo-learn-wiki)
+本次为重大重构：仓库从「仅 skills plugin」升级为「skills + tools + 知识库模板」三合一开源仓库，并完成开源化适配（去 bun、去 EXTEND.md、跨平台、清理敏感信息）。
 
-### Refactor
-- Redesign yo-code-readme template with screenshots and developer guide
+### 新功能
+- 新增 `tools/`：迁移自定义命令行工具（gif / wiki / word-count / zed-to-ghostty / yo），统一 `yo` 调度，内置跨平台依赖检查
+- 新增 `vault-template/`：知识库/笔记模板框架（原子库 → 知识库 + 我的画像 + 资料库），仅含框架与使用说明，无个人数据
+- 新增知识库 skill：yo-opentalk / yo-whoami / yo-wiki-atom / yo-wiki-review（从本地知识库迁移，统一以 `$WIKI_DIR` 引用）
+- 新增 yo-self-review：每日/每周复盘 skill（从本地笔记迁移，以 `$NOTES_DIR` 引用）
+- 引入统一配置机制：`$YO_CONFIG_HOME/config.env` + first-time-setup 引导（agent 帮用户配置，替代 EXTEND.md；跨平台，Windows 用 `setx`）
+- 每个 skill 提供「两份文档」：SKILL.md（给 agent）+ README.md（给人）
 
-### Documentation
-- Update README with yo-utils-music installation and usage instructions
+### 变更
+- 仓库不再作为 Claude Code plugin：移除 `.claude-plugin/` 与 `release-skills`，skill 通过 `npx skills add` 或复制目录安装
+- 去除 bun / package.json / tsconfig 依赖，skills 不再需要 TypeScript 运行时
+- 去除 EXTEND.md 配置机制，改用统一 config.env + 环境变量
+- CLAUDE.md 重写：内联创建流程与用户输入工具约定，新增统一配置机制、Tools 约定、两份文档约定与版本规则（patch / minor / major）
+- yo-utils-music：音乐偏好改存入 vault 的「我的画像/我的偏好」
+- opencli：新增 first-time-setup（cdp alias / chrome profile 引导）
+- Chrome profile 环境变量改名：`YOLANDA_CHROME_PROFILE_DIR` → `CHROME_PROFILE_DIR`
 
-## 0.2.0 - 2026-05-08
+### 废弃
+- yo-code-simplify / yo-learn-wiki / yo-utils-url 标记 deprecated（文件保留，不再维护）
 
-### Features
-- Add configurable Chrome profile support via EXTEND.md chrome_profile field (yo-utils-url 0.1.0)
-- Add environment check steps to first-time setup: opencli install, Chrome Bridge verification (yo-utils-url)
-- Add Chrome profile isolation choice (Q5) to setup flow (yo-utils-url)
+### 平台
+- tools 增加跨平台支持与依赖检查（macOS / Linux / Windows 安装提示）
+- zed-to-ghostty 标注仅 macOS
 
-### Fixes
-- Replace unreliable curl-based CDP port check with opencli daemon status polling (yo-utils-url)
-- Clean stale SingletonLock/Socket/Cookie files before launching Chrome (yo-utils-url)
-- Add Windows and Linux Chrome binary paths to findChrome() (yo-utils-url)
+---
 
-### Documentation
-- Rewrite README with per-skill prerequisites, install steps, and usage examples
-- Replace obsidian-cli with filesystem checks in yo-utils-url first-time setup
-- Add CLI hint for auto-launching Obsidian in yo-learn-wiki (0.1.1)
+## 历史版本（1.0.0 之前）
 
-## 0.1.1 - 2026-04-30
-
-### Features
-- Add GitHub Release step to release-skills workflow
-
-### Fixes
-- Upgrade actions/checkout to v6 for native Node 24 support
-- Opt-in CI actions to Node 24 to suppress deprecation warning
-- Switch CI from npm to bun
-
-### Refactor
-- Use dynamic cover image discovery from cover_dir instead of hardcoded mapping (yo-learn-wiki)
-- Add 11 new cover images and compress existing assets (yo-learn-wiki)
-
-## 0.1.0 - 2026-04-30
-
-### Features
-- Add yo-utils-url skill for URL content collection
-- Add yo-learn-wiki skill for knowledge base learning
-- Add project-specific release-skills workflow under .claude/skills/
-
-### Fixes
-- Rename skills with yo- prefix and add CLAUDE.md
-
-### Refactor
-- Design skill creation flow referencing baoyu-skills
-- Improve yo-utils-url first-time setup with auto-detection
+- **0.3.0**（2026-05-13）：新增 yo-utils-music；重设计 yo-code-readme 模板
+- **0.2.0**（2026-05-08）：yo-utils-url 增加 Chrome profile 隔离与跨平台路径
+- **0.1.1**（2026-04-30）：release-skills 增加 GitHub Release；CI 切换 bun
+- **0.1.0**（2026-04-30）：初始版本，新增 yo-utils-url / yo-learn-wiki / release-skills

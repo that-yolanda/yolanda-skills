@@ -1,0 +1,202 @@
+#!/usr/bin/env bash
+# DESC=中英文字数统计
+set -euo pipefail
+
+show_help() {
+  cat <<'EOF'
+word-count — 中英文字数统计
+技术栈: Perl (Unicode 文本处理，支持 UTF-8 / GB18030 / Big5)
+
+用法:
+  yo word-count <txt文件路径>
+  yo word-count -f <file> | --file <file>
+  yo word-count -t <text> | --text <text>
+
+参数:
+  -f, --file <file>     按文件统计（兼容直接传入文件路径）
+  -t, --text <text>     按字符串统计
+  -h, --help            显示帮助
+
+统计规则:
+  中文汉字: 每个汉字算 1 个字
+  英文单词: 每个单词算 1 个字
+  空格、标点、括号: 不统计
+  数字: 默认不统计
+
+示例:
+  yo word-count ./demo.txt
+  yo word-count -f ./demo.txt
+  yo word-count --file ./demo.txt
+  yo word-count -t "你好 world"
+  yo word-count --text "你好 world（test）Hello, AI!"
+
+配置:
+  无需额外配置
+EOF
+}
+
+count_content() {
+  local source_type="$1"
+  local payload="$2"
+
+  perl -MEncode -CS - "$source_type" "$payload" <<'PERL'
+use strict;
+use warnings;
+use feature 'unicode_strings';
+use Encode qw(decode FB_CROAK FB_DEFAULT);
+
+my ($source_type, $payload) = @ARGV;
+
+my $text = '';
+my $encoding = 'input-string';
+my $source = $payload;
+
+if ($source_type eq 'file') {
+    local $/;
+
+    open my $fh, '<:raw', $payload or die "错误：无法读取文件：$payload\n";
+    my $bytes = <$fh>;
+    close $fh;
+
+    for my $enc ('UTF-8', 'gb18030', 'Big5') {
+        my $decoded = eval { decode($enc, $bytes, FB_CROAK) };
+
+        if (defined $decoded) {
+            $text = $decoded;
+            $encoding = $enc;
+            last;
+        }
+    }
+
+    if ($text eq '') {
+        $text = decode('UTF-8', $bytes, FB_DEFAULT);
+        $encoding = 'unknown-fallback';
+    }
+
+    # 去掉 UTF-8 BOM
+    $text =~ s/^\x{FEFF}//;
+}
+elsif ($source_type eq 'text') {
+    my $decoded = eval { decode('UTF-8', $payload, FB_CROAK) };
+    $text = defined($decoded) ? $decoded : $payload;
+    $source = $text;
+}
+else {
+    die "错误：未知统计类型：$source_type\n";
+}
+
+my $chinese_count = () = $text =~ /\p{Han}/g;
+
+my $english_count = () = $text =~ /[A-Za-z]+(?:['\x{2019}][A-Za-z]+)*/g;
+
+my $total_count = $chinese_count + $english_count;
+
+print "\n统计结果\n";
+print "------------------------\n";
+print "来源：$source\n";
+print "编码：$encoding\n" if $source_type eq 'file';
+print "中文汉字数：$chinese_count\n";
+print "英文单词数：$english_count\n";
+print "合计字数：$total_count\n";
+PERL
+}
+
+check_deps() {
+  if ! command -v perl >/dev/null 2>&1; then
+    echo "错误: 缺少依赖: perl" >&2
+    case "$(uname -s)" in
+      Darwin*) echo "macOS: 系统自带 perl，若无请 'brew install perl'" ;;
+      Linux*)  echo "Linux: 'apt install perl' 或对应包管理器" ;;
+      MINGW*|MSYS*|CYGWIN*) echo "Windows: 安装 Strawberry Perl (https://strawberryperl.com/) 并加入 PATH" ;;
+    esac
+    exit 1
+  fi
+}
+
+main() {
+  check_deps
+  if [[ $# -eq 0 ]]; then
+    show_help
+    exit 1
+  fi
+
+  local MODE=""
+  local PAYLOAD=""
+
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      -h|--help)
+        show_help
+        ;;
+      -f|--file)
+        if [[ -z "${2:-}" ]]; then
+          echo "错误: -f/--file 需要指定文件路径"
+          exit 1
+        fi
+        MODE="file"
+        PAYLOAD="$2"
+        shift 2
+        ;;
+      -t|--text)
+        if [[ -z "${2:-}" ]]; then
+          echo "错误: -t/--text 需要指定字符串"
+          exit 1
+        fi
+        MODE="text"
+        PAYLOAD="$2"
+        shift 2
+        ;;
+      -f*|--file=*)
+        MODE="file"
+        if [[ "$1" == --file=* ]]; then
+          PAYLOAD="${1#--file=}"
+        else
+          PAYLOAD="${1#-f}"
+        fi
+        shift
+        ;;
+      -t*|--text=*)
+        MODE="text"
+        if [[ "$1" == --text=* ]]; then
+          PAYLOAD="${1#--text=}"
+        else
+          PAYLOAD="${1#-t}"
+        fi
+        shift
+        ;;
+      -*)
+        echo "错误: 未知选项: $1"
+        echo
+        show_help
+        exit 1
+        ;;
+      *)
+        # 位置参数：第一个非选项参数作为文件路径
+        if [[ -z "$MODE" ]]; then
+          MODE="file"
+          PAYLOAD="$1"
+        else
+          echo "错误: 多余参数: $1"
+          exit 1
+        fi
+        shift
+        ;;
+    esac
+  done
+
+  if [[ -z "$MODE" ]]; then
+    show_help
+    exit 1
+  fi
+
+  if [[ "$MODE" == "file" ]]; then
+    if [[ ! -f "$PAYLOAD" ]]; then
+      echo "错误: 文件不存在或不是普通文件: $PAYLOAD"
+      exit 1
+    fi
+  fi
+
+  count_content "$MODE" "$PAYLOAD"
+}
+
+main "$@"

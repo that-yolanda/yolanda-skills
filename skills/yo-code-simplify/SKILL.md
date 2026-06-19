@@ -5,6 +5,8 @@ version: 0.0.2
 author: yolanda
 ---
 
+> ⚠️ **Deprecated**：本 skill 已废弃、不再维护。
+
 # Code Simplify
 
 执行"以减法为先"的代码审查。目标不是补更多结构，而是让代码更短、更直白、更贴近当前项目规模。

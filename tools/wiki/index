@@ -1,0 +1,657 @@
+#!/usr/bin/env bash
+# DESC=本地知识库管理（搜索 + 添加）
+
+# Resolve symlink to get script directory
+SOURCE="$0"
+while [ -L "$SOURCE" ]; do
+    DIR="$(cd -P "$(dirname "$SOURCE")" && pwd)"
+    SOURCE="$(readlink "$SOURCE")"
+    [[ "$SOURCE" != /* ]] && SOURCE="$DIR/$SOURCE"
+done
+DIR="$(cd -P "$(dirname "$SOURCE")" && pwd)"
+
+# ── 配置 ──
+if [[ -z "$WIKI_DIR" ]]; then
+    echo "错误: 未设置环境变量 WIKI_DIR" >&2
+    exit 1
+fi
+if [[ ! -d "$WIKI_DIR" ]]; then
+    echo "错误: WIKI_DIR 目录不存在: $WIKI_DIR" >&2
+    exit 1
+fi
+DATA_FILE="$WIKI_DIR/原子库/atoms.jsonl"
+
+# ── 依赖检查 ──
+check_deps() {
+    local missing=()
+    command -v rg >/dev/null 2>&1 || missing+=(rg)
+    command -v jq >/dev/null 2>&1 || missing+=(jq)
+    if [[ ${#missing[@]} -gt 0 ]]; then
+        echo "错误: 缺少依赖: ${missing[*]}" >&2
+        case "$(uname -s)" in
+            Darwin*) echo "安装: brew install ${missing[*]}" ;;
+            Linux*)  echo "安装: sudo apt install ${missing[*]}" ;;
+            MINGW*|MSYS*|CYGWIN*) echo "安装: winget install ${missing[*]}（rg: BurntSushi.ripgrep.MSVC, jq: jqlang.jq）" ;;
+        esac >&2
+        exit 1
+    fi
+}
+
+# ── 帮助信息 ──
+usage() {
+    cat << 'EOF'
+wiki — 本地知识库管理
+技术栈: bash + rg + jq
+
+用法:
+  yo wiki search [options] <keywords...>
+  yo wiki add <json_record>
+
+子命令:
+  search    搜索知识库
+  add       添加记录
+  update    更新记录状态
+
+示例:
+  yo wiki search -l 10 --type principle "商业模式"
+  yo wiki add '{"knowledge":"...","type":"principle","confidence":"high"}'
+  yo wiki update 2026-06-001 -s achieved
+
+配置:
+  必须设置环境变量 WIKI_DIR（知识库根目录）
+  数据文件路径: $WIKI_DIR/原子库/atoms.jsonl
+EOF
+}
+
+search_usage() {
+    cat << 'EOF'
+wiki search — 搜索知识库
+
+用法:
+  yo wiki search [options] <keywords...>
+
+参数:
+  keywords          搜索关键词，逗号分隔为 OR，多个位置参数为 AND（可选，可置于选项前后）
+
+选项:
+  -l, --limit N     返回数量（默认: 20）
+  -b, --begin DATE  起始日期（YYYY-MM-DD）
+  -e, --end DATE    结束日期（YYYY-MM-DD）
+  -t, --type TYPE   类型过滤，可多次指定（OR 语义）
+                    principle（原则）- 可复用的原则、规律（解释 WHY）
+                    method（方法）- 可执行的方法（解释 HOW）
+                    case（案例）- 真实案例（解释 WHAT HAPPENED）
+                    anti-pattern（反模式）- 错误模式（论证 WHAT FAILS）
+                    tool（工具）- 可复用资产（解释 WHAT TO USE）
+                    insight（洞察）- 洞察、观点（解释 WHAT MIGHT BE TRUE）
+  -s, --status STATUS   状态过滤，逗号分隔（OR）: null/pending/achieved/discorded
+  -a, --author NAME 作者过滤，逗号分隔（OR，模糊匹配）
+  -c, --confidence  置信度过滤，逗号分隔（OR）: high/medium/low
+  -T, --tags TAG    标签过滤，可多次指定（OR 语义）
+  -f, --format FMT  输出格式（默认: text）
+                    可选: text / json / table / csv
+
+示例:
+  yo wiki search "商业模式" "定价"
+  yo wiki search "商业模式,定价"                # 关键词 OR
+  yo wiki search -s null,pending "案例"         # status 为 null 或 pending
+  yo wiki search -c high,medium -a "张三,李四"   # 多值 OR 组合
+  yo wiki search -l 5 -t principle -T "语言与思维" "逻辑"
+EOF
+}
+
+add_usage() {
+    cat << 'EOF'
+wiki add — 添加知识记录
+
+用法:
+  yo wiki add '<json_record>'
+
+  也可以从 stdin 读入（管道或重定向）
+
+必填字段:
+  knowledge    知识点陈述
+  type         类型，可选值及含义:
+               principle（原则）- 可复用的原则、规律（解释 WHY）
+               method（方法）- 可执行的方法（解释 HOW）
+               case（案例）- 真实案例（解释 WHAT HAPPENED）
+               anti-pattern（反模式）- 错误模式（论证 WHAT FAILS）
+               tool（工具）- 可复用资产（解释 WHAT TO USE）
+               insight（洞察）- 洞察、观点（解释 WHAT MIGHT BE TRUE）
+  confidence   置信度: high/medium/low
+
+可选字段:
+  status       状态: null/pending/achieved/discorded（默认 null）
+  author       作者
+  original     原文（最多 200 字）
+  url          外部链接
+  date         发布日期（YYYY-MM-DD，默认今天）
+  tags         主题标签（字符串数组，默认 []）
+
+自动生成:
+  id           格式 YYYY-MM-NNN，同月自增，新月从 001 起
+
+示例:
+  yo wiki add '{"knowledge":"...","type":"principle","confidence":"high","tags":["标签1"]}'
+  echo '{"knowledge":"...","type":"case","confidence":"medium"}' | yo wiki add
+EOF
+}
+
+update_usage() {
+    cat << 'EOF'
+wiki update — 更新知识记录
+
+用法:
+  yo wiki update <id> [options]
+
+参数:
+  id                记录 ID（格式: YYYY-MM-NNN）
+
+选项（至少指定一个）:
+  -s, --status STATUS       新状态: null / pending / achieved / discorded
+  -t, --type TYPE           新类型: principle / method / case / anti-pattern / tool / insight
+  -c, --confidence LEVEL    新置信度: high / medium / low
+  -T, --tags TAGS           新标签（覆盖，逗号分隔）: "标签1,标签2"
+
+示例:
+  yo wiki update 2026-06-001 -s achieved
+  yo wiki update 2026-06-003 -s pending -c high
+  yo wiki update 2026-06-005 -t method -T "定价,商业模式"
+EOF
+}
+
+# ── 搜索 ──
+do_search() {
+    local limit=20
+    local start_date=""
+    local end_date=""
+    local types=()
+    local confidence=""
+    local tags=()
+    local status=""
+    local format="text"
+    local author=""
+    local keywords=()
+
+    # 解析参数：遍历所有参数，选项和关键词位置可互换
+    local positional=()
+    while [[ $# -gt 0 ]]; do
+        case "$1" in
+            -l|--limit)     limit="$2"; shift 2 ;;
+            -b|--begin)     start_date="$2"; shift 2 ;;
+            -e|--end)       end_date="$2"; shift 2 ;;
+            -t|--type)      types+=("$2"); shift 2 ;;
+            -c|--confidence) confidence="$2"; shift 2 ;;
+            -T|--tags)      tags+=("$2"); shift 2 ;;
+            -s|--status)    status="$2"; shift 2 ;;
+            -a|--author)    author="$2"; shift 2 ;;
+            -f|--format)    format="$2"; shift 2 ;;
+            -h|--help)      search_usage; return 0 ;;
+            --)             shift; break ;;
+            -*)             echo "未知选项: $1" >&2; search_usage; return 1 ;;
+            *)              positional+=("$1"); shift ;;
+        esac
+    done
+    # -- 之后的都作为关键词
+    positional+=("$@")
+    keywords=("${positional[@]}")
+
+    # 校验 format
+    case "$format" in
+        text|json|table|csv) ;;
+        *) echo "错误: 不支持的格式 '$format'，可选: text/json/table/csv" >&2; return 1 ;;
+    esac
+
+    # 校验 status（逗号分隔，每个值独立校验）
+    if [[ -n "$status" ]]; then
+        IFS=',' read -ra _sv <<< "$status"
+        for v in "${_sv[@]}"; do
+            v="${v# }"; v="${v% }"
+            case "$v" in
+                null|pending|achieved|discorded) ;;
+                *) echo "错误: status 值必须为 null/pending/achieved/discorded，实际: $v" >&2; return 1 ;;
+            esac
+        done
+    fi
+
+    # 校验数据文件存在
+    if [[ ! -f "$DATA_FILE" ]]; then
+        echo "(知识库文件不存在: $DATA_FILE)" >&2
+        return 1
+    fi
+
+    # ── 构建 jq 结构化过滤 ──
+    local jq_args=()
+    local filter_parts=("true")
+
+    if [[ -n "$confidence" ]]; then
+        local conf_json
+        conf_json=$(echo "$confidence" | tr ',' '\n' | jq -R -s -c 'split("\n") | map(select(length > 0))')
+        jq_args+=(--argjson conf_values "$conf_json")
+        filter_parts+=('and (.confidence | IN($conf_values[]))')
+    fi
+
+    if [[ -n "$start_date" ]]; then
+        jq_args+=(--arg start "$start_date")
+        filter_parts+=('and .date >= $start')
+    fi
+
+    if [[ -n "$end_date" ]]; then
+        jq_args+=(--arg end "$end_date")
+        filter_parts+=('and .date <= $end')
+    fi
+
+    if [[ ${#types[@]} -gt 0 ]]; then
+        local types_json
+        types_json=$(printf '%s\n' "${types[@]}" | jq -R -s -c 'split("\n") | map(select(length > 0))')
+        jq_args+=(--argjson types "$types_json")
+        filter_parts+=('and (.type | IN($types[]))')
+    fi
+
+    if [[ ${#tags[@]} -gt 0 ]]; then
+        local tags_json
+        tags_json=$(printf '%s\n' "${tags[@]}" | jq -R -s -c 'split("\n") | map(select(length > 0))')
+        jq_args+=(--argjson tags "$tags_json")
+        filter_parts+=('and (any(.tags[]?; IN($tags[])))')
+    fi
+
+    if [[ -n "$status" ]]; then
+        local status_json
+        status_json=$(echo "$status" | tr ',' '\n' | jq -R -s -c 'split("\n") | map(select(length > 0))')
+        jq_args+=(--argjson status_values "$status_json")
+        filter_parts+=('and ((.status // "null") | IN($status_values[]))')
+    fi
+
+    if [[ -n "$author" ]]; then
+        local author_json
+        author_json=$(echo "$author" | tr ',' '\n' | jq -R -s -c 'split("\n") | map(select(length > 0))')
+        jq_args+=(--argjson author_values "$author_json")
+        filter_parts+=('and ((.author // "") | ascii_downcase as $a | any($author_values[]; $a | contains(. | ascii_downcase)))')
+    fi
+
+    local IFS=' '
+    local filter="select(${filter_parts[*]})"
+
+    # ── 关键词预过滤（rg）──
+    # 每个位置参数内逗号分隔为 OR，多个位置参数之间为 AND
+    local raw_lines
+    if [[ ${#keywords[@]} -gt 0 ]]; then
+        local data_q pipeline
+        data_q=$(printf '%q' "$DATA_FILE")
+        pipeline=""
+        for ((i=0; i<${#keywords[@]}; i++)); do
+            local or_args=""
+            IFS=',' read -ra _kws <<< "${keywords[i]}"
+            for kw in "${_kws[@]}"; do
+                kw="${kw# }"; kw="${kw% }"
+                [[ -n "$kw" ]] && or_args+=" -e $(printf '%q' "$kw")"
+            done
+            if [[ $i -eq 0 ]]; then
+                pipeline="rg -i -F${or_args} -- $data_q"
+            else
+                pipeline="${pipeline} | rg -i -F${or_args}"
+            fi
+        done
+        raw_lines=$(eval "$pipeline" 2>/dev/null)
+    else
+        raw_lines=$(cat "$DATA_FILE")
+    fi
+
+    if [[ -z "$raw_lines" ]]; then
+        echo "(无匹配结果)"
+        return 0
+    fi
+
+    # ── jq 结构化过滤 → 排序 → 截断 → 格式化 ──
+    local result
+    result=$(echo "$raw_lines" | jq -c "${jq_args[@]}" "$filter" 2>/dev/null)
+
+    if [[ -z "$result" ]]; then
+        echo "(无匹配结果)"
+        return 0
+    fi
+
+    case "$format" in
+        text)
+            echo "$result" \
+                | jq -s "sort_by(.date, .id) | reverse | .[0:$limit] | .[]" \
+                | jq -r '
+                    "---",
+                    "\(.id)  \(.type)  \(.confidence)  \(if .status != null then .status else "-" end)  \(if (.author // "") != "" then "@\(.author)" else "" end)",
+                    (if (.tags | length) > 0 then
+                        [.tags[] | "#" + .] | join(" ")
+                    else
+                        "-"
+                    end),
+                    .knowledge,
+                    (if .original != "" then
+                        "[原文] \(.original[0:150])\(if (.original | length) > 150 then "..." else "" end)"
+                    else
+                        "[原文] -"
+                    end),
+                    (if .url != "" then "[链接] \(.url)" else "[链接] -" end),
+                    (if .date != "" then .date else "-" end)
+                  ' 2>/dev/null
+            ;;
+
+        json)
+            echo "$result" \
+                | jq -s "sort_by(.date, .id) | reverse | .[0:$limit]" 2>/dev/null
+            ;;
+
+        table)
+            echo "$result" \
+                | jq -s "sort_by(.date, .id) | reverse | .[0:$limit]" \
+                | jq -r '
+                    (["| ID | Knowledge | Type | Confidence | Status | Author | Tags | Date |",
+                      "|---|---|---|---|---|---|---|---|"] +
+                     [.[] |
+                        "| " + ([.id,
+                                 (.knowledge[0:60] + if (.knowledge | length) > 60 then "..." else "" end),
+                                 .type,
+                                 .confidence,
+                                 (.status // "-"),
+                                 (.author // ""),
+                                 (.tags | join(", ")),
+                                 .date
+                                ] | join(" | ")) + " |"
+                     ])
+                    | .[]
+                  ' 2>/dev/null
+            ;;
+
+        csv)
+            echo "id,knowledge,original,url,date,tags,type,confidence,status,author"
+            echo "$result" \
+                | jq -s "sort_by(.date, .id) | reverse | .[0:$limit] | .[]" \
+                | jq -r '
+                    [ .id,
+                      .knowledge,
+                      (.original // ""),
+                      (.url // ""),
+                      .date,
+                      (.tags | join("; ")),
+                      .type,
+                      .confidence,
+                      (.status // ""),
+                      (.author // "")
+                    ] | @csv
+                  ' 2>/dev/null
+            ;;
+    esac
+}
+
+# ── 添加 ──
+do_add() {
+    local input="$1"
+
+    # -h / --help
+    case "$input" in
+        -h|--help) add_usage; return 0 ;;
+    esac
+
+    # 无参数时从 stdin 读入
+    if [[ -z "$input" ]]; then
+        input=$(cat)
+    fi
+
+    if [[ -z "$input" ]]; then
+        echo "错误: 缺少 JSON 记录" >&2
+        add_usage
+        return 1
+    fi
+
+    # 校验 JSON 合法性
+    if ! echo "$input" | jq empty 2>/dev/null; then
+        echo "错误: 无效的 JSON" >&2
+        return 1
+    fi
+
+    # 校验必填字段
+    local knowledge type confidence status
+    knowledge=$(echo "$input" | jq -r '.knowledge // empty')
+    type=$(echo "$input" | jq -r '.type // empty')
+    confidence=$(echo "$input" | jq -r '.confidence // empty')
+    status=$(echo "$input" | jq -r '.status // ""')
+
+    local missing_fields=()
+    [[ -z "$knowledge" ]] && missing_fields+=(knowledge)
+    [[ -z "$type" ]] && missing_fields+=(type)
+    [[ -z "$confidence" ]] && missing_fields+=(confidence)
+
+    if [[ ${#missing_fields[@]} -gt 0 ]]; then
+        echo "错误: 缺少必填字段: ${missing_fields[*]}" >&2
+        return 1
+    fi
+
+    # 校验 confidence 值
+    case "$confidence" in
+        high|medium|low) ;;
+        *) echo "错误: confidence 必须为 high/medium/low，实际: $confidence" >&2; return 1 ;;
+    esac
+
+    # 校验 type 值
+    case "$type" in
+        principle|method|case|anti-pattern|insight|tool) ;;
+        *) echo "错误: type 必须为 principle/method/case/anti-pattern/insight/tool，实际: $type" >&2; return 1 ;;
+    esac
+
+    # 校验 status（若提供）
+    if [[ -n "$status" ]]; then
+        case "$status" in
+            null|pending|achieved|discorded) ;;
+            *) echo "错误: status 必须为 null/pending/achieved/discorded，实际: $status" >&2; return 1 ;;
+        esac
+    fi
+
+    # 确保目录存在
+    mkdir -p "$(dirname "$DATA_FILE")"
+
+    # ── 生成 ID ──
+    local current_ym
+    current_ym=$(date +%Y-%m)
+
+    local new_id
+    if [[ ! -f "$DATA_FILE" || ! -s "$DATA_FILE" ]]; then
+        new_id="${current_ym}-001"
+    else
+        local last_id
+        last_id=$(tail -1 "$DATA_FILE" | jq -r '.id // "0"')
+        if [[ -z "$last_id" || "$last_id" == "0" || "$last_id" == "null" ]]; then
+            new_id="${current_ym}-001"
+        else
+            local last_ym last_seq
+            last_ym="${last_id%-*}"
+            last_seq="${last_id##*-}"
+            if [[ "$last_ym" == "$current_ym" ]]; then
+                # 移除前导零后 +1，再补零
+                local seq_num=$((10#$last_seq + 1))
+                new_id="${current_ym}-$(printf '%03d' "$seq_num")"
+            else
+                new_id="${current_ym}-001"
+            fi
+        fi
+    fi
+
+    # ── 写入 ──
+    local record
+    record=$(echo "$input" | jq -c \
+        --arg id "$new_id" \
+        --arg date_default "$(date +%Y-%m-%d)" \
+        '{
+            id: $id,
+            knowledge: .knowledge,
+            original: (.original // ""),
+            url: (.url // ""),
+            date: (.date // $date_default),
+            tags: (.tags // []),
+            type: .type,
+            confidence: .confidence,
+            status: (if (.status == null or .status == "" or .status == "null") then null else .status end),
+            author: (.author // "")
+        }')
+
+    echo "$record" >> "$DATA_FILE"
+
+    # 显示确认
+    local preview
+    preview=$(echo "$knowledge" | cut -c1-60)
+    echo "✓ 已添加: $new_id — $preview"
+}
+
+# ── 更新 ──
+do_update() {
+    local record_id=""
+    local new_status=""
+    local new_type=""
+    local new_confidence=""
+    local new_tags=""
+
+    while [[ $# -gt 0 ]]; do
+        case "$1" in
+            -s|--status)      new_status="$2"; shift 2 ;;
+            -t|--type)        new_type="$2"; shift 2 ;;
+            -c|--confidence)  new_confidence="$2"; shift 2 ;;
+            -T|--tags)        new_tags="$2"; shift 2 ;;
+            -h|--help)        update_usage; return 0 ;;
+            -*)               echo "未知选项: $1" >&2; update_usage; return 1 ;;
+            *)                record_id="$1"; shift ;;
+        esac
+    done
+
+    # 校验 ID
+    if [[ -z "$record_id" ]]; then
+        echo "错误: 缺少记录 ID" >&2
+        update_usage
+        return 1
+    fi
+
+    # 至少要有一个更新字段
+    if [[ -z "$new_status" && -z "$new_type" && -z "$new_confidence" && -z "$new_tags" ]]; then
+        echo "错误: 至少需要指定一个更新字段（-s/-t/-c/-T）" >&2
+        update_usage
+        return 1
+    fi
+
+    # 校验各字段值
+    if [[ -n "$new_status" ]]; then
+        case "$new_status" in
+            null|pending|achieved|discorded) ;;
+            *) echo "错误: status 必须为 null/pending/achieved/discorded，实际: $new_status" >&2; return 1 ;;
+        esac
+    fi
+
+    if [[ -n "$new_type" ]]; then
+        case "$new_type" in
+            principle|method|case|anti-pattern|tool|insight) ;;
+            *) echo "错误: type 必须为 principle/method/case/anti-pattern/tool/insight，实际: $new_type" >&2; return 1 ;;
+        esac
+    fi
+
+    if [[ -n "$new_confidence" ]]; then
+        case "$new_confidence" in
+            high|medium|low) ;;
+            *) echo "错误: confidence 必须为 high/medium/low，实际: $new_confidence" >&2; return 1 ;;
+        esac
+    fi
+
+    # 校验数据文件
+    if [[ ! -f "$DATA_FILE" ]]; then
+        echo "错误: 知识库文件不存在: $DATA_FILE" >&2
+        return 1
+    fi
+
+    # 查找记录
+    local found
+    found=$(grep -n "\"id\":\"${record_id}\"" "$DATA_FILE" | head -1)
+    if [[ -z "$found" ]]; then
+        found=$(grep -n "\"id\": *\"${record_id}\"" "$DATA_FILE" | head -1)
+    fi
+
+    if [[ -z "$found" ]]; then
+        echo "错误: 未找到 ID 为 $record_id 的记录" >&2
+        return 1
+    fi
+
+    local line_num="${found%%:*}"
+
+    # 构建 jq 更新表达式
+    local jq_args=()
+    local jq_expr="."
+
+    if [[ -n "$new_status" ]]; then
+        jq_args+=(--arg status "$new_status")
+        jq_expr+=' | if $status == "null" then .status = null else .status = $status end'
+    fi
+
+    if [[ -n "$new_type" ]]; then
+        jq_args+=(--arg type "$new_type")
+        jq_expr+=' | .type = $type'
+    fi
+
+    if [[ -n "$new_confidence" ]]; then
+        jq_args+=(--arg confidence "$new_confidence")
+        jq_expr+=' | .confidence = $confidence'
+    fi
+
+    if [[ -n "$new_tags" ]]; then
+        local tags_json
+        tags_json=$(echo "$new_tags" | tr ',' '\n' | jq -R -s -c 'split("\n") | map(select(length > 0))')
+        jq_args+=(--argjson tags "$tags_json")
+        jq_expr+=' | .tags = $tags'
+    fi
+
+    # 执行更新
+    local current_line updated_line
+    current_line=$(sed -n "${line_num}p" "$DATA_FILE")
+    updated_line=$(echo "$current_line" | jq -c "${jq_args[@]}" "$jq_expr")
+
+    if [[ -z "$updated_line" ]]; then
+        echo "错误: 更新失败" >&2
+        return 1
+    fi
+
+    # 替换原行
+    sed -i '' "${line_num}s|.*|${updated_line}|" "$DATA_FILE"
+
+    # 显示更新摘要
+    local preview changes=()
+    preview=$(echo "$updated_line" | jq -r '.knowledge' | cut -c1-60)
+
+    [[ -n "$new_status" ]] && changes+=("status → ${new_status}")
+    [[ -n "$new_type" ]] && changes+=("type → ${new_type}")
+    [[ -n "$new_confidence" ]] && changes+=("confidence → ${new_confidence}")
+    [[ -n "$new_tags" ]] && changes+=("tags → ${new_tags}")
+
+    echo "✓ 已更新: $record_id — ${changes[*]}"
+    echo "  $preview"
+}
+
+# ── 入口 ──
+check_deps
+
+subcmd="${1:-}"
+shift 2>/dev/null || true
+
+case "$subcmd" in
+    search)
+        do_search "$@"
+        exit $?
+        ;;
+    add)
+        do_add "$@"
+        exit $?
+        ;;
+    update)
+        do_update "$@"
+        exit $?
+        ;;
+    -h|--help|"")
+        usage
+        ;;
+    *)
+        echo "未知子命令: $subcmd" >&2
+        usage
+        exit 1
+        ;;
+esac

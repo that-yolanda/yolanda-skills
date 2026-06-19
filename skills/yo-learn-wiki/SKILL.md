@@ -5,6 +5,8 @@ version: 0.2.0
 author: yolanda
 ---
 
+> ⚠️ **Deprecated**：本 skill 已废弃、不再维护。知识库整理能力已由 `yo-opentalk` / `yo-wiki-atom` / `yo-wiki-review` + `vault-template` 取代。
+
 # Yo Learn Wiki
 
 将 Obsidian 笔记按专题组织为结构化知识库。每个专题目录是一个自包含的子知识库——有索引入口、逻辑排序、完整方法论，AI agent 执行任务时可直接引用。

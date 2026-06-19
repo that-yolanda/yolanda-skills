@@ -1,0 +1,24 @@
+#!/usr/bin/env bash
+# DESC=从zed选中文件行数发送到ghostty中（仅 macOS）
+
+if [[ "$(uname -s)" != "Darwin" ]]; then
+    echo "错误: zed-to-ghostty 仅支持 macOS（依赖 osascript 与 Ghostty.app）" >&2
+    exit 1
+fi
+
+FILE="$1"
+ROW="$2"
+SELECTED="$3"
+
+if [[ -n "$SELECTED" ]]; then
+    TEXT="@${FILE}:${ROW}"
+else
+    TEXT="@${FILE}"
+fi
+
+osascript <<EOF
+tell application "Ghostty"
+    set t to focused terminal of selected tab of front window
+    input text "$TEXT" to t
+end tell
+EOF

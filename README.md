@@ -1,221 +1,99 @@
 <div align="center">
 <h1>Yolanda Skills</h1>
-个人日常在使用的 Skills 合集，覆盖代码审查、知识库管理、内容采集等场景。支持 Claude Code / Codex / Hermes 等 Agent。
+<p>个人日常使用的 Skills + Tools + 知识库模板合集，支持 Claude Code 等 Agent runtime。</p>
 </div>
 
-## 组合应用
-### Obsidian 知识库
-使用 skill: [yo-utils-url](#yo-utils-url) 采集 + [yo-learn-wiki](#yo-learn-wiki) 知识库整理
+本仓库包含三部分：
 
-**效果展示**
-![obsidian-wiki](docs/screenshot/obsidian-wiki1.png)
-![obsidian-wiki](docs/screenshot/obsidian-wiki2.png)
+- **`skills/`** — Claude Code skills 集合，覆盖代码、知识库、笔记、生活场景
+- **`tools/`** — 自定义命令行工具（视频转 GIF、知识库管理等），通过 `yo` 调度
+- **`vault-template/`** — 个人知识库/笔记的模板框架，clone 后初始化你自己的 vault
 
-## SKILL目录
+## 快速开始
 
-| Skill                                                | 类型    | 说明                                                      | 依赖环境                                                                                     |
-| ---------------------------------------------------- | ----- | ------------------------------------------------------- | ---------------------------------------------------------------------------------------- |
-| [yo-learn-wiki](#yo-learn-wiki)       | Learn | 基于 Obsidian 的人类可读的知识库，自动生成基于  Obsidian base数据库的可视化知识库目录 | [bun](https://bun.com/), obsidian cli, chrome                                            |
-| [yo-utils-url](#yo-utils-url)         | Utils | 提取 URL 内容保存到 Obsidian 中（微信公众号、Twitter/X、YouTube、任意网页）   | node, [bun](https://bun.com/) [@jackwener/opencli](https://github.com/jackwener/OpenCLI) |
-| [yo-utils-music](#yo-utils-music)     | Utils | 音乐伴侣，基于偏好智能选曲，控制网易云音乐播放                               | node, [@jackwener/opencli](https://github.com/jackwener/OpenCLI), 网易云音乐桌面客户端  |
-| [yo-code-readme](#yo-code-readme)     | Code  | 创建或更新项目 README.md                                       | -                                                                                        |
-| [yo-code-simplify](#yo-code-simplify) | Code  | 代码可读性与复杂度审核                                             | -                                                                                        |
+### 1. 安装 Skills
 
-命名规范：`yo-<分类>-<功能>`
+用 vercel 的 skills CLI 安装单个 skill：
 
-## 告诉 AI AGENT 快速安装
-
-告诉你的 AI：
-```
-安装这些 skill：https://github.com/that-yolanda/yolanda-skills
+```bash
+npx skills add github:that-yolanda/yolanda-skills --skill yo-opentalk
 ```
 
-或指定单个 skill：
-```
-帮我安装 https://github.com/that-yolanda/yolanda-skills 里的 yo-utils-url skill
-```
+或直接 clone 仓库，把 `skills/<name>` 复制到你的 agent skills 路径（如 `~/.claude/skills/`）：
 
-## 手动安装
-
-### yo-utils-url
-
-提取 URL 内容为 Markdown。支持微信公众号、Twitter/X、YouTube、任意网页。自动下载图片/视频等资源，输出为 Obsidian 兼容的 Markdown 文件。
-
-**准备环境**
-- 安装 [bun](https://bun.com/) 环境
-```zsh
-# mac / linux
-curl -fsSL https://bun.sh/install | bash
-
-# windows
-powershell -c "irm bun.sh/install.ps1 | iex"
-```
-- 确保 Chrome 存在
-- 安装 [opencli](https://github.com/jackwener/OpenCLI) 并配置安装Chrome 的 Browser Bridge 扩展插件 [指导](https://github.com/jackwener/OpenCLI#2-install-the-browser-bridge-extension)  （这步在后续 skill 初次执行时也会引导安装，可选择复用用户 chrome profile 或 创建隔离环境，避免影响用户个人chrome 账号）
-```zsh
-# 检查node版本，要求 Node.js >= 21
-node --version
-# 安装opencli
-npm install -g @jackwener/opencli
-
-# 后续升级
-npm install -g @jackwener/opencli@latest
+```bash
+git clone https://github.com/that-yolanda/yolanda-skills
 ```
 
-**安装**
+### 2. 安装 Tools
 
-```zsh
-npx skills add github:that-yolanda/yolanda-skills --skill yo-utils-url
+```bash
+git clone https://github.com/that-yolanda/yolanda-skills
+# 把 tools/ 加入 PATH（macOS/Linux）
+echo "export PATH=\"$(pwd)/yolanda-skills/tools:\$PATH\"" >> ~/.zshrc
+source ~/.zshrc
+yo list   # 查看可用工具
 ```
 
-**使用**
+### 3. 首次配置（无需手动）
 
-初次使用
-```markdown
-/yo-utils-url 初始化
-```
+每个需要环境配置的 skill，首次使用时直接对 agent 说：
 
-后续采集
-```markdown
-/yo-utils-url https://mp.weixin.qq.com/s/xxxxx
-```
+> 帮我配置 yo-opentalk（或 yo-self-review、opencli 等）
 
-### yo-learn-wiki
+agent 会询问必要信息（如知识库路径），写入 `$YO_CONFIG_HOME/config.env` 并使其生效——**你无需手动编辑任何环境变量**。详见 [配置机制](#配置机制)。
 
-基于 Obsidian 的人类可读的知识库，自动生成基于  Obsidian base数据库的可视化知识库目录，构建个人知识图谱。
-
-**流程设计**
+## 目录结构
 
 ```
-初始化
-  检测 Vault → 配置 EXTEND.md → 创建 Base 视图 → 复制封面图 → 验证
-  (可选) 预设专题目录
-
-Ingest（整理笔记）
-  源文件 → 分析内容（Entity / Topic）
-         → 匹配已有页面
-              ├─ 已存在 → 增量更新
-              └─ 不存在 → 专题匹配
-                           ├─ 命中现有专题 → 放入
-                           └─ 未命中 → 确认新专题 → 创建页面
-
-Diagnose（知识库诊断）
-  元数据检查 → 断链检查 → Dead end → 孤立源文件
-
-Restructure（专题整理 · 建议定期执行）
-  粗筛 description → 精读存疑内容 → 拆分 / 合并建议 → 确认后执行
+skills/          Claude Code skills（SKILL.md 给 agent + README.md 给人）
+tools/           命令行工具（yo <subcommand>）
+vault-template/  知识库/笔记模板（仅框架，无个人数据）
+.env.example     环境变量清单模板
 ```
 
-**准备环境**
-- 确保已安装 [Obsidian](https://obsidian.md/)
-- 启用obsidian-cli：进入 Obsidian → 设置 → 关于 → 命令行界面
-- 安装 [bun](https://bun.com/) 环境
-```zsh
-# mac / linux
-curl -fsSL https://bun.sh/install | bash
+## Skills
 
-# windows
-powershell -c "irm bun.sh/install.ps1 | iex"
+| Skill | 类型 | 说明 |
+|-------|------|------|
+| yo-opentalk | 知识库 | 日常对话入口，路由到原子录入 / 画像更新 / 开放讨论 |
+| yo-wiki-atom | 知识库 | 从输入提取知识原子写入原子库 |
+| yo-wiki-review | 知识库 | 定期提炼原子到专题知识库与画像 |
+| yo-whoami | 知识库 | 个人画像（经历/状态/目标/偏好/疑问）读写 |
+| yo-self-review | 笔记 | 每日/每周复盘，训练判断力 |
+| yo-utils-music | 生活 | 基于偏好控制网易云音乐播放 |
+| yo-code-readme | 开发 | 生成或更新项目 README |
+| opencli | 通用 | 复用 Chrome 登录 profile 访问反爬/登录网站 |
+| agent-browser | 通用 | 浏览器自动化 CLI（hidden，按需调用） |
+
+**已废弃**（文件保留、不再维护）：`yo-code-simplify`、`yo-learn-wiki`、`yo-utils-url`。
+
+## Tools
+
+通过 `yo <subcommand>` 调用，把 `tools/` 加入 PATH 后全局可用。
+
+| 工具 | 说明 | 依赖 / 平台 |
+|------|------|------------|
+| gif | 视频转 GIF | ffmpeg · 跨平台 |
+| wiki | 原子知识库管理 | rg + jq · 跨平台 |
+| word-count | 中英文字数统计 | perl · Windows 需装 Strawberry Perl |
+| zed-to-ghostty | zed 发送路径到 ghostty | **仅 macOS** |
+
+## vault-template
+
+个人知识库/笔记的模板框架：原子库（原始信息）→ 知识库（提炼沉淀）+ 我的画像 + 资料库。clone 后初始化你自己的 vault：
+
+```bash
+cp -r vault-template ~/path/to/我的知识库
+# 然后让 agent 配置 yo-opentalk，它会引导设置 WIKI_DIR 指向该目录
 ```
 
-**安装**
-```zsh
-npx skills add github:that-yolanda/yolanda-skills --skill yo-learn-wiki
-```
+## 配置机制
 
+所有环境配置统一在 `$YO_CONFIG_HOME/config.env`，由 agent 在首次使用 skill 时经 first-time-setup 引导写入并使其生效。`YO_CONFIG_HOME` 默认：macOS/Linux `~/.config/yolanda-skills`，Windows `%APPDATA%\yolanda-skills`。变量清单见 [`.env.example`](.env.example)。
 
-**使用**
-```markdown
-/yo-learn-wiki 初始化
-```
-
-```markdown
-整理这篇笔记到知识库：03-文章/AI/某篇文章.md
-```
-
-```markdown
-诊断知识库健康状态
-```
-
-```markdown
-整理知识库专题结构
-```
-
-### yo-utils-music
-
-音乐伴侣，根据偏好智能选曲，通过网易云音乐桌面客户端播放。学习你的音乐口味，持续优化推荐。
-
-**准备环境**
-- 安装 [opencli](https://github.com/jackwener/OpenCLI)（若已安装可跳过，安装步骤见上方 yo-utils-url 章节）
-- 安装 [网易云音乐桌面客户端](https://music.163.com/#/download)
-- 首次使用需以调试模式启动网易云音乐（后续 skill 会自动引导）：
-```zsh
-/Applications/NeteaseMusic.app/Contents/MacOS/NeteaseMusic --remote-debugging-port=9223
-```
-
-**安装**
-```zsh
-opencli plugin install github:that-yolanda/opencli-netease-music
-```
-
-**使用**
-
-```markdown
-来点音乐
-```
-
-```markdown
-播放周杰伦的歌
-```
-
-```markdown
-帮我探索一些民谣
-```
-
-```markdown
-暂停 / 下一首
-```
-
-### yo-code-readme
-
-扫描项目结构、配置文件和源码，生成或更新 README。无额外依赖。
-
-**安装**
-```zsh
-npx skills add github:that-yolanda/yolanda-skills --skill yo-code-readme
-```
-
-**使用**
-```markdown
-帮我生成 README
-```
-
-```markdown
-更新项目 README，重点补充安装步骤
-```
-
-### yo-code-simplify
-
-审查代码中的过度设计、冗余抽象和不必要的复杂度，给出简化建议。无额外依赖。
-
-**安装**
-
-```zsh
-npx skills add github:that-yolanda/yolanda-skills --skill yo-code-simplify
-```
-
-
-**使用**
-
-```markdown
-审查 src/utils 目录的代码复杂度
-```
-
-```markdown
-简化这个 PR 中的过度抽象
-```
-
+个人数据（知识库、笔记、画像）放在你自己的 vault，由 `WIKI_DIR` / `NOTES_DIR` 指向，不入仓库。
 
 ## 协议
 
-MIT License
+[MIT](LICENSE)
