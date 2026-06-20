@@ -3,8 +3,8 @@
 本仓库是 Yolanda 的开源工具集合，包含三部分：
 
 - **`skills/`** — Claude Code skills 集合（每个 skill 一个目录，含 SKILL.md）
-- **`tools/`** — 自定义命令行工具集，通过 `yo <subcommand>` 调度
 - **`vault-template/`** — 个人知识库/笔记的模板框架（供他人 clone 初始化自己的 vault）
+- **`examples/`** — 可选示例脚本，演示如何给 agent 提供外部命令协议
 
 本文档是仓库的开发约定。面向最终用户的使用说明见 `README.md`。
 
@@ -15,8 +15,8 @@
 ```
 .claude/                 # Claude Code 配置（commands 等）
 skills/                  # 所有 skill（每个含 SKILL.md，可选 README.md / references/）
-tools/                   # 命令行工具（yo 调度器 + 各子工具）
 vault-template/          # 知识库/笔记模板（仅框架，无个人数据）
+examples/                # 示例脚本（如 yo wiki 命令协议）
 .env.example             # 环境变量清单模板（实际配置在 $YO_CONFIG_HOME/config.env，不入仓库）
 README.md                # 面向用户的项目说明
 CLAUDE.md                # 本文件（开发约定）
@@ -130,7 +130,7 @@ setx WIKI_DIR "C:\Users\me\wiki"
 ```
 > `setx` 永久生效但当前窗口不立即生效，需重开终端 / 重启 agent。
 
-此后所有变量成为系统环境变量，tools 脚本与 skills/agent 均以 `$VAR` 读取。`tools/yo` 另有兜底 source。
+此后所有变量成为系统环境变量，skills/agent 与 examples 脚本均以 `$VAR` 读取。
 
 ### first-time-setup（agent 引导）
 
@@ -150,20 +150,16 @@ setx WIKI_DIR "C:\Users\me\wiki"
 | `NOTES_DIR` | 笔记/复盘根 | yo-self-review |
 | `CHROME_PROFILE_DIR` | 隔离 chrome profile | opencli |
 
-新增需要配置的 skill/tool 时，同步更新 `.env.example` 与本表。
+新增需要配置的 skill 或 example 时，同步更新 `.env.example` 与本表。
 
 ---
 
-## Tools 开发
+## Examples 开发
 
-- 统一入口：`yo <subcommand>`，调度器在 `tools/yo`（Bash，动态发现子目录）
-- 每个工具一个目录，入口脚本命名 `index`（无扩展名，shebang `#!/usr/bin/env bash`），第二行写 `# DESC=<一句话描述>`（供 `yo list` 提取）
-- CLI 约定：支持 `-h` / `--help`；入口做依赖检查；缺失依赖时按 `uname -s` 给出平台安装提示（`brew` / `apt` / `winget`）
-- 依赖自管理（Bash 工具用系统依赖）
-- 用户将 `tools/` 加入 PATH 后全局可用
-- 跨平台：标注平台限制（如 zed-to-ghostty 仅 macOS）；敏感值走环境变量（见 config.env）
-
-新增工具无需注册，`yo list` 自动发现。
+- `examples/` 只放最小可读的示例代码，不作为正式工具实现维护
+- 示例用于说明 Skill 依赖的外部命令协议，如 `yo wiki search/add/update`
+- 示例脚本必须避免个人路径和密钥，敏感值走环境变量（见 config.env）
+- Windows 如无法直接运行示例，由 agent 按本机环境自行适配入口脚本
 
 ---
 

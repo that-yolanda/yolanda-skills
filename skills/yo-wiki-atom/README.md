@@ -9,7 +9,7 @@
 
 ## 安装与首次配置
 
-依赖 `WIKI_DIR` 与 `yo wiki` 命令（tools/wiki，需加入 PATH）。对 agent 说「帮我配置 yo-wiki-atom」引导完成。
+依赖 `WIKI_DIR` 与可执行的 `yo wiki` 命令。仓库提供 `examples/yo.mjs` 作为读写 `atoms.jsonl` 的示例实现；对 agent 说「帮我配置 yo-wiki-atom」引导完成。
 
 ## 它会做什么
 

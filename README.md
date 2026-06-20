@@ -1,13 +1,13 @@
 <div align="center">
 <h1>Yolanda Skills</h1>
-<p>个人日常使用的 Skills + Tools + 知识库模板合集，支持 Claude Code 等 Agent runtime。</p>
+<p>本仓库包含个人日常使用的 skill，及一整套知识库模板框架。</p>
 </div>
 
 本仓库包含三部分：
 
 - **`skills/`** — Claude Code skills 集合，覆盖代码、知识库、笔记、生活场景
-- **`tools/`** — 自定义命令行工具（视频转 GIF、知识库管理等），通过 `yo` 调度
 - **`vault-template/`** — 个人知识库/笔记的模板框架，clone 后初始化你自己的 vault
+- **`examples/`** — 可选示例脚本，演示如何提供 `yo wiki` 命令给 agent 读写原子库
 
 ## 快速开始
 
@@ -25,17 +25,28 @@ npx skills add github:that-yolanda/yolanda-skills --skill yo-opentalk
 git clone https://github.com/that-yolanda/yolanda-skills
 ```
 
-### 2. 安装 Tools
+### 2. 初始化知识库模板
 
 ```bash
 git clone https://github.com/that-yolanda/yolanda-skills
-# 把 tools/ 加入 PATH（macOS/Linux）
-echo "export PATH=\"$(pwd)/yolanda-skills/tools:\$PATH\"" >> ~/.zshrc
-source ~/.zshrc
-yo list   # 查看可用工具
+cp -r yolanda-skills/vault-template ~/path/to/我的知识库
 ```
 
-### 3. 首次配置（无需手动）
+### 3. 配置 `yo wiki` 示例命令（可选）
+
+部分知识库 skill 会通过 `yo wiki` 命令读写 `$WIKI_DIR/原子库/atoms.jsonl`。本仓库只提供一个示例脚本，用户可以直接使用，也可以按自己的系统改写。
+
+macOS / Linux 可在 shell rc 中（例如 .zshrc）加入：
+
+```bash
+yo() {
+  node "/path/to/yolanda-skills/examples/yo.mjs" "$@"
+}
+```
+
+Windows 用户需让 agent 按本机环境自行适配等效命令入口。
+
+### 4. 首次配置（无需手动）
 
 每个需要环境配置的 skill，首次使用时直接对 agent 说：
 
@@ -47,8 +58,8 @@ agent 会询问必要信息（如知识库路径），写入 `$YO_CONFIG_HOME/co
 
 ```
 skills/          Claude Code skills（SKILL.md 给 agent + README.md 给人）
-tools/           命令行工具（yo <subcommand>）
 vault-template/  知识库/笔记模板（仅框架，无个人数据）
+examples/        可选示例脚本（如 yo wiki 原子库读写）
 .env.example     环境变量清单模板
 ```
 
@@ -63,21 +74,10 @@ vault-template/  知识库/笔记模板（仅框架，无个人数据）
 | yo-self-review | 笔记 | 每日/每周复盘，训练判断力 |
 | yo-utils-music | 生活 | 基于偏好控制网易云音乐播放 |
 | yo-code-readme | 开发 | 生成或更新项目 README |
-| opencli | 通用 | 复用 Chrome 登录 profile 访问反爬/登录网站 |
-| agent-browser | 通用 | 浏览器自动化 CLI（hidden，按需调用） |
+| agent-browser | 通用 | 浏览器 / Electron CLI 控制，复用 cookie |
+| opencli | 通用 | 浏览器 / Electron CLI 控制，复用 cookie，根据站点做过特定优化，效率更高 |
 
 **已废弃**（文件保留、不再维护）：`yo-code-simplify`、`yo-learn-wiki`、`yo-utils-url`。
-
-## Tools
-
-通过 `yo <subcommand>` 调用，把 `tools/` 加入 PATH 后全局可用。
-
-| 工具 | 说明 | 依赖 / 平台 |
-|------|------|------------|
-| gif | 视频转 GIF | ffmpeg · 跨平台 |
-| wiki | 原子知识库管理 | rg + jq · 跨平台 |
-| word-count | 中英文字数统计 | perl · Windows 需装 Strawberry Perl |
-| zed-to-ghostty | zed 发送路径到 ghostty | **仅 macOS** |
 
 ## vault-template
 
