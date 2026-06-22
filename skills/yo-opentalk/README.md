@@ -8,7 +8,7 @@
 
 ## 安装
 
-用 `npx skills add github:that-yolanda/yolanda-skills --skill yo-opentalk` 安装，或把本 skill 目录复制到你的 agent skills 路径（见仓库 README）。
+用 `npx skills add github:that-yolanda/yolanda-skills` 安装（交互式选择需要的 skill），或把本 skill 目录复制到你的 agent skills 路径（见仓库 README）。
 
 ## 首次使用
 
@@ -16,7 +16,7 @@
 
 > 帮我配置 yo-opentalk
 
-agent 会询问你的知识库路径，从 `vault-template` 初始化（如需要），并设置好 `WIKI_DIR` 环境变量。你无需手动改任何配置。
+agent 会询问你的知识库路径，从 `知识库模板` 初始化（如需要），并设置好 `WIKI_DIR` 环境变量。你无需手动改任何配置。
 
 ## 它会做什么
 

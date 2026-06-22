@@ -1,5 +1,7 @@
 # yo-code-readme
 
+> ⚠️ **Deprecated**：已废弃、不再维护。项目 README 生成请使用 Claude Code 通用能力或 `skill-creator`。
+
 为项目根目录创建或更新 `README.md`，按固定模板整理项目名称、简介、核心功能、快速开始、开发指南、规划。
 
 ## 何时用

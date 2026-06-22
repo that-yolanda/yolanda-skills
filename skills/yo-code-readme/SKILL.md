@@ -5,6 +5,8 @@ version: 0.1.1
 author: yolanda
 ---
 
+> ⚠️ **Deprecated**：本 skill 已废弃、不再维护。项目 README 生成请使用 Claude Code 通用能力或 `skill-creator`。
+
 # CODE README
 
 为项目根目录创建或更新 `README.md`。

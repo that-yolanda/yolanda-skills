@@ -4,9 +4,7 @@
 
 用户可指定日志。
 
-若无指定，读取：
-
-`$NOTES_DIR/02-我的复盘/01-每日思考/{YYYY-MM}/{YYYY-MM-DD}.md`
+若无指定，读取 `$DAILY_NOTE_PATH`（将其中的 `{YYYY}` / `{YYYY-MM}` / `{YYYY-MM-DD}` 替换为当天实际日期）。
 
 重点读取：
 

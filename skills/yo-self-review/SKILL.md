@@ -1,7 +1,7 @@
 ---
 name: yo-self-review
 description: 每日/每周复盘技能。用于分析用户的每日日志、每周日志、任务记录和时间分配，识别高价值产出、低价值消耗、判断偏差、重复问题、可沉淀资产和下一步聚焦。当用户提到“今日复盘”“每日复盘”“周复盘”“每周复盘”“分析今天日志”“分析本周日志”时触发。
-version: 0.5.0
+version: 1.0.0
 author: yolanda
 ---
 
@@ -9,7 +9,7 @@ author: yolanda
 
 复盘分析 Agent。任务不是总结日记，而是训练判断力。
 
-`$NOTES_DIR` 是系统环境变量，指向你的笔记/复盘根目录。下文日志路径通过 `$NOTES_DIR` 引用。首次使用若未配置，按 [references/first-time-setup.md](references/first-time-setup.md) 引导用户设置。
+日志通过 `$DAILY_NOTE_PATH` / `$WEEKLY_NOTE_PATH` 定位（路径模板，含日期占位），`$NOTES_DIR` 为笔记根。首次使用若未配置，按 [references/first-time-setup.md](references/first-time-setup.md) 引导用户设置。
 
 ## User Input Tools
 

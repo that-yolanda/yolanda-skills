@@ -22,24 +22,19 @@ opencli doctor    # 检查与 chrome 的连接 + 扩展跳板
 
 ### 3. 按平台使其生效
 
-- **macOS/Linux**：确保 shell rc（`~/.zshrc` / `~/.bashrc`）含：
+- **macOS/Linux**：把下面内容加到当前 shell 的启动文件（如 zsh 的 `~/.zshenv`），已有则跳过：
   ```bash
   export YO_CONFIG_HOME="${YO_CONFIG_HOME:-$HOME/.config/yolanda-skills}"
   [ -f "$YO_CONFIG_HOME/config.env" ] && set -a && . "$YO_CONFIG_HOME/config.env" && set +a
   ```
-  无则追加。
-- **Windows**：用 `setx` 落地：
-  ```cmd
-  setx YO_CONFIG_HOME "%APPDATA%\yolanda-skills"
-  setx CHROME_PROFILE_DIR "<路径>"
-  ```
-  提示重开终端。
+  当前 session 即时 `source` 该文件。
+- **Windows**：`setx YO_CONFIG_HOME "%APPDATA%\yolanda-skills"` + `setx CHROME_PROFILE_DIR "<路径>"`（持久化）；当前窗口 `set CHROME_PROFILE_DIR=<路径>` 即时生效。
 
 ### 4. 配置 cdp alias
 
-在用户 shell rc 追加 alias，启动带该 profile 的 chrome（供 opencli 扩展跳板连接）。
+把 alias 加到当前 shell 的启动文件（如 zsh 的 `~/.zshenv`），启动带该 profile 的 chrome（供 opencli 扩展跳板连接）。
 
-macOS（`~/.zshrc` / `~/.bashrc`）：
+macOS：
 ```bash
 alias cdp='/Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome --remote-debugging-port=9222 --user-data-dir="$CHROME_PROFILE_DIR" >/dev/null 2>&1 &'
 ```
@@ -56,7 +51,7 @@ function cdp { Start-Process chrome "--remote-debugging-port=9222 --user-data-di
 
 ### 5. 连接扩展并登录
 
-提示用户 `source ~/.zshrc`（或重开终端）→ 运行 `cdp` 启动 chrome → 在 chrome 中安装 opencli 扩展跳板 → 登录目标网站。
+提示用户 `source` 对应启动文件（或重开终端）→ 运行 `cdp` 启动 chrome → 在 chrome 中安装 opencli 扩展跳板 → 登录目标网站。
 
 ### 6. 验证
 

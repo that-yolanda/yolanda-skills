@@ -1,7 +1,7 @@
 ---
 name: yo-utils-music
 description: 音乐伴侣，基于用户偏好通过网易云音乐桌面客户端播放音乐。Use when user asks to "播放音乐"、"听歌"、"来点音乐"、"music"，或表达想听音乐的意图。
-version: 0.1.3
+version: 0.2.0
 author: yolanda
 ---
 
@@ -9,7 +9,7 @@ author: yolanda
 
 音乐伴侣，根据用户偏好智能选曲，通过网易云音乐桌面客户端播放。
 
-音乐偏好读取自 `$WIKI_DIR/我的画像/我的偏好.md` 的「音乐偏好」章节。`$WIKI_DIR` 是系统环境变量，指向你的知识库 vault 根目录。首次使用若未配置，按 [references/first-time-setup.md](references/first-time-setup.md) 引导用户设置。
+音乐偏好读取自 `$YO_CONFIG_HOME/music.md`。`$YO_CONFIG_HOME` 是系统环境变量，默认：macOS/Linux `~/.config/yolanda-skills`；Windows `%APPDATA%\yolanda-skills`。首次使用若未配置，按 [references/first-time-setup.md](references/first-time-setup.md) 引导用户设置。
 
 ## User Input Tools
 
@@ -30,7 +30,7 @@ author: yolanda
 
 ### Step 1: 读取偏好 + 选曲播放
 
-读取 `$WIKI_DIR/我的画像/我的偏好.md` 的「音乐偏好」章节（风格、歌手、场景、反馈记录），据此选曲。命令格式和故障排查见 [references/netease-music.md](references/netease-music.md)。
+读取 `$YO_CONFIG_HOME/music.md`，据此选曲。命令格式和故障排查见 [references/netease-music.md](references/netease-music.md)。
 
 **选曲策略**：
 
@@ -50,7 +50,7 @@ author: yolanda
 
 ### Step 2: 反馈 → 更新偏好
 
-播放后收集用户反馈，通过 `yo-whoami` 更新 `$WIKI_DIR/我的画像/我的偏好.md` 的「音乐偏好」章节（画像由 yo-whoami 统一写入）。
+播放后收集用户反馈，直接更新 `$YO_CONFIG_HOME/music.md`。
 
 **触发时机**：
 - 用户主动评价（"不错"/"换一首"/"不喜欢"）
@@ -64,30 +64,30 @@ author: yolanda
 
 ## 偏好文件格式
 
-`$WIKI_DIR/我的画像/我的偏好.md` 中的一个 `##` 章节，例如：
+`$YO_CONFIG_HOME/music.md` 的完整格式：
 
 ```markdown
-## 音乐偏好
+# 音乐偏好
 
-### 风格偏好
+## 风格偏好
 流行、民谣、轻音乐
 
-### 喜欢的歌手
+## 喜欢的歌手
 周杰伦、陈奕迅
 
-### 听歌场景
+## 听歌场景
 工作时听轻音乐，放松时听流行
 
-### 反馈记录
+## 反馈记录
 - 周杰伦《晴天》：很喜欢，适合工作时候听
 ```
 
-若该章节不存在，按 [references/first-time-setup.md](references/first-time-setup.md) 引导用户初始化。
+若该文件不存在或为空，按 [references/first-time-setup.md](references/first-time-setup.md) 引导用户初始化。
 
 ## Content Rules
 
-- 每次播放前读取偏好章节
+- 每次播放前读取 `$YO_CONFIG_HOME/music.md`
 - 命令细节不内联，按需读取 [references/netease-music.md](references/netease-music.md)
 - 播放结果只报告歌曲名和歌手，不输出完整表格
 - 错误只报告步骤 + 原因
-- 偏好写入统一经 yo-whoami，不直接编辑画像文件
+- 偏好由本 skill 直接写入 `$YO_CONFIG_HOME/music.md`，不经过其他 skill

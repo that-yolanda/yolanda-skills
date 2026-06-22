@@ -52,7 +52,7 @@ function fail(code, message, suggestion) {
 
 function showHelp() {
   const text = `wiki — 本地知识库管理
-技术栈: bash + rg + jq
+技术栈: node
 
 用法:
   yo wiki search [options] <keywords...>
