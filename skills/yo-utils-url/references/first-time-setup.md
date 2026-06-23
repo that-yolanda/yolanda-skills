@@ -77,8 +77,8 @@ ls -1
 > 是否为此 skill 创建独立的 Chrome Profile？
 
 - **创建隔离 Profile (Recommended)** — 不干扰日常浏览，profile 路径写入 EXTEND.md。默认路径根据平台：
-  - macOS/Linux：`~/.config/yolanda-skills/chrome-profile`
-  - Windows：`%LOCALAPPDATA%\yolanda-skills\chrome-profile`
+  - macOS/Linux：`~/.local/share/yo/chrome-profile`
+  - Windows：`%LOCALAPPDATA%\yo\chrome-profile`
   - 用户可自定义路径。
 - **复用当前 Chrome** — 不创建隔离 profile，需确保 Chrome 已运行且安装了 Browser Bridge 扩展。
 

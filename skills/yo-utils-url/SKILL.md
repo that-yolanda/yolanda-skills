@@ -56,7 +56,7 @@ Concrete `AskUserQuestion` references below are examples — substitute the loca
 
 ```bash
 test -f .claude/skills/yo-utils-url/EXTEND.md -o -f .agent/skills/yo-utils-url/EXTEND.md && echo "project"
-test -f "${XDG_CONFIG_HOME:-$HOME/.config}/yolanda-skills/yo-utils-url/EXTEND.md" && echo "xdg"
+test -f "${YO_CONFIG_HOME:-$HOME/.local/share/yo}/yo-utils-url/EXTEND.md" && echo "xdg"
 ```
 
 | Result | Action |

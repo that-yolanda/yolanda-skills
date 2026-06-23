@@ -17,15 +17,15 @@ echo "${WIKI_DIR:-未设置}"
    cp -r 知识库模板 "<用户指定路径>"
    ```
 3. 把 `WIKI_DIR=<用户指定路径>` 写入 `$YO_CONFIG_HOME/config.env`（文件不存在则创建）。
-   `YO_CONFIG_HOME` 默认：macOS/Linux `~/.config/yolanda-skills`，Windows `%APPDATA%\yolanda-skills`。
+   `YO_CONFIG_HOME` 默认：macOS/Linux `~/.local/share/yo`，Windows `%LOCALAPPDATA%\yo`。
 4. 按平台使其生效：
    - **macOS/Linux**：把下面内容加到当前 shell 的启动文件（如 zsh 的 `~/.zshenv`），已有则跳过：
      ```bash
-     export YO_CONFIG_HOME="${YO_CONFIG_HOME:-$HOME/.config/yolanda-skills}"
+     export YO_CONFIG_HOME="${YO_CONFIG_HOME:-$HOME/.local/share/yo}"
      [ -f "$YO_CONFIG_HOME/config.env" ] && set -a && . "$YO_CONFIG_HOME/config.env" && set +a
      ```
      当前 session 即时 `source` 该文件
-   - **Windows**：`setx YO_CONFIG_HOME "%APPDATA%\yolanda-skills"` + `setx WIKI_DIR "<用户指定路径>"`（持久化）；当前窗口 `set WIKI_DIR=<路径>` 即时生效
+   - **Windows**：`setx YO_CONFIG_HOME "%LOCALAPPDATA%\yo"` + `setx WIKI_DIR "<用户指定路径>"`（持久化）；当前窗口 `set WIKI_DIR=<路径>` 即时生效
 5. 重新检查 `$WIKI_DIR` 是否就绪
 
 ## 就绪后

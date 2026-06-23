@@ -18,17 +18,17 @@ opencli doctor    # 检查与 chrome 的连接 + 扩展跳板
 
 ### 2. 设置 chrome profile 目录
 
-确认 profile 路径（默认 `$YO_CONFIG_HOME/chrome-profile`，`YO_CONFIG_HOME` 默认 macOS/Linux `~/.config/yolanda-skills`、Windows `%APPDATA%\yolanda-skills`）。把 `CHROME_PROFILE_DIR=<路径>` 写入 `$YO_CONFIG_HOME/config.env`。
+确认 profile 路径（默认 `$YO_CONFIG_HOME/chrome-profile`，`YO_CONFIG_HOME` 默认 macOS/Linux `~/.local/share/yo`、Windows `%LOCALAPPDATA%\yo`）。把 `CHROME_PROFILE_DIR=<路径>` 写入 `$YO_CONFIG_HOME/config.env`。
 
 ### 3. 按平台使其生效
 
 - **macOS/Linux**：把下面内容加到当前 shell 的启动文件（如 zsh 的 `~/.zshenv`），已有则跳过：
   ```bash
-  export YO_CONFIG_HOME="${YO_CONFIG_HOME:-$HOME/.config/yolanda-skills}"
+  export YO_CONFIG_HOME="${YO_CONFIG_HOME:-$HOME/.local/share/yo}"
   [ -f "$YO_CONFIG_HOME/config.env" ] && set -a && . "$YO_CONFIG_HOME/config.env" && set +a
   ```
   当前 session 即时 `source` 该文件。
-- **Windows**：`setx YO_CONFIG_HOME "%APPDATA%\yolanda-skills"` + `setx CHROME_PROFILE_DIR "<路径>"`（持久化）；当前窗口 `set CHROME_PROFILE_DIR=<路径>` 即时生效。
+- **Windows**：`setx YO_CONFIG_HOME "%LOCALAPPDATA%\yo"` + `setx CHROME_PROFILE_DIR "<路径>"`（持久化）；当前窗口 `set CHROME_PROFILE_DIR=<路径>` 即时生效。
 
 ### 4. 配置 cdp alias
 

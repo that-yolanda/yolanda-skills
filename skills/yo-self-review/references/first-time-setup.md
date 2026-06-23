@@ -27,11 +27,11 @@ echo "${WEEKLY_NOTE_PATH:-未设置}"
    - `WEEKLY_NOTE_PATH`（含 `{START}` / `{END}`，对应本周一 / 本周日）
    按用户实际目录结构填写，示例见本文件顶部。
 3. 把三个变量写入 `$YO_CONFIG_HOME/config.env`（文件不存在则创建）。`DAILY_NOTE_PATH` / `WEEKLY_NOTE_PATH` 可引用 `$NOTES_DIR`（确保 `NOTES_DIR` 行在前）。
-   `YO_CONFIG_HOME` 默认：macOS/Linux `~/.config/yolanda-skills`，Windows `%APPDATA%\yolanda-skills`。
+   `YO_CONFIG_HOME` 默认：macOS/Linux `~/.local/share/yo`，Windows `%LOCALAPPDATA%\yo`。
 4. 按平台使其生效：
    - **macOS/Linux**：把下面内容加到当前 shell 的启动文件（如 zsh 的 `~/.zshenv`），已有则跳过：
      ```bash
-     export YO_CONFIG_HOME="${YO_CONFIG_HOME:-$HOME/.config/yolanda-skills}"
+     export YO_CONFIG_HOME="${YO_CONFIG_HOME:-$HOME/.local/share/yo}"
      [ -f "$YO_CONFIG_HOME/config.env" ] && set -a && . "$YO_CONFIG_HOME/config.env" && set +a
      ```
      当前 session 即时 `source` 该文件

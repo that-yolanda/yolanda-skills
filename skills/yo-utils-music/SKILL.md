@@ -9,7 +9,7 @@ author: yolanda
 
 音乐伴侣，根据用户偏好智能选曲，通过网易云音乐桌面客户端播放。
 
-音乐偏好读取自 `$YO_CONFIG_HOME/music.md`。`$YO_CONFIG_HOME` 是系统环境变量，默认：macOS/Linux `~/.config/yolanda-skills`；Windows `%APPDATA%\yolanda-skills`。首次使用若未配置，按 [references/first-time-setup.md](references/first-time-setup.md) 引导用户设置。
+音乐偏好读取自 `$YO_CONFIG_HOME/music.md`。`$YO_CONFIG_HOME` 是系统环境变量，默认：macOS/Linux `~/.local/share/yo`；Windows `%LOCALAPPDATA%\yo`。首次使用若未配置，按 [references/first-time-setup.md](references/first-time-setup.md) 引导用户设置。
 
 ## User Input Tools
 

@@ -261,6 +261,8 @@ Windows：由 agent 按本机环境适配等效入口（如 doskey 或 PowerShel
 
 ## 配置机制
 
+`YO_CONFIG_HOME` 与 yo 工具(`@that-yolanda/yo-toolkits`)共享统一根(`~/.local/share/yo`,Windows `%LOCALAPPDATA%\yo`):skills 的配置(`config.env` / `music.md` / `chrome-profile`)与 yo 的数据(`config.json` / `store/` / `registry.local.json`)共存于此,便于统一备份与迁移。
+
 所有环境配置集中在一个文件：`$YO_CONFIG_HOME/config.env`。
 
 | 变量 | 用途 | 使用方 |
@@ -275,8 +277,8 @@ Windows：由 agent 按本机环境适配等效入口（如 doskey 或 PowerShel
 
 | 平台 | 路径 |
 |------|------|
-| macOS / Linux | `~/.config/yolanda-skills` |
-| Windows | `%APPDATA%\yolanda-skills` |
+| macOS / Linux | `~/.local/share/yo` |
+| Windows | `%LOCALAPPDATA%\yo` |
 
 用户可自定义 `YO_CONFIG_HOME` 覆盖默认。**所有配置由 agent 在首次使用时引导完成**，用户无需手动编辑。
 
@@ -289,7 +291,7 @@ Windows：由 agent 按本机环境适配等效入口（如 doskey 或 PowerShel
 写入当前 shell 的启动文件（如 zsh 的 `~/.zshenv`），已有则跳过：
 
 ```bash
-export YO_CONFIG_HOME="${YO_CONFIG_HOME:-$HOME/.config/yolanda-skills}"
+export YO_CONFIG_HOME="${YO_CONFIG_HOME:-$HOME/.local/share/yo}"
 [ -f "$YO_CONFIG_HOME/config.env" ] && set -a && . "$YO_CONFIG_HOME/config.env" && set +a
 ```
 
@@ -300,7 +302,7 @@ export YO_CONFIG_HOME="${YO_CONFIG_HOME:-$HOME/.config/yolanda-skills}"
 `setx` 持久化（新进程自动继承）+ `set`/`$env:` 当前窗口即时生效：
 
 ```cmd
-setx YO_CONFIG_HOME "%APPDATA%\yolanda-skills"
+setx YO_CONFIG_HOME "%LOCALAPPDATA%\yo"
 setx WIKI_DIR "<路径>"
 set WIKI_DIR=<路径>
 echo %WIKI_DIR%

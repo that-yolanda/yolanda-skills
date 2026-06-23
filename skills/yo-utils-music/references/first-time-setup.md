@@ -4,7 +4,7 @@
 
 ## 0. 确认配置目录
 
-音乐偏好文件位于 `$YO_CONFIG_HOME/music.md`。`$YO_CONFIG_HOME` 默认：macOS/Linux `~/.config/yolanda-skills`；Windows `%APPDATA%\yolanda-skills`，由全局统一配置机制管理。本 skill 直接使用该默认目录，无需单独配置 shell。
+音乐偏好文件位于 `$YO_CONFIG_HOME/music.md`。`$YO_CONFIG_HOME` 默认：macOS/Linux `~/.local/share/yo`；Windows `%LOCALAPPDATA%\yo`，由全局统一配置机制管理。本 skill 直接使用该默认目录，无需单独配置 shell。
 
 ## 1. 检查 opencli
 
