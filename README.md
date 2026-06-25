@@ -261,9 +261,7 @@ Windows：由 agent 按本机环境适配等效入口（如 doskey 或 PowerShel
 
 ## 配置机制
 
-`YO_CONFIG_HOME` 与 yo 工具(`@that-yolanda/yo-toolkits`)共享统一根(`~/.local/share/yo`,Windows `%LOCALAPPDATA%\yo`):skills 的配置(`config.env` / `music.md` / `chrome-profile`)与 yo 的数据(`config.json` / `store/` / `registry.local.json`)共存于此,便于统一备份与迁移。
-
-所有环境配置集中在一个文件：`$YO_CONFIG_HOME/config.env`。
+所有 skill 配置和数据统一存放路径 `YO_CONFIG_HOME`，配置：`$YO_CONFIG_HOME/config.env`。
 
 | 变量 | 用途 | 使用方 |
 |------|------|--------|
